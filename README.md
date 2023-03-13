@@ -77,3 +77,6 @@ Removing file 2-www.google.com.crt
 Removing file 0-gts-root-r1.crt
 Removing file cacert.pem
 ```
+
+# :warning: MitM proxies/services
+Given the way MitM proxies and decryption services work, this tool is not intended to be used behind devices that perform SSL/TLS decryption as those devices strip the `Authority Information Access` (AIA), and alter the `Subject Key Identifier` (SKI) and `Authority Key Identifier` (AKI) fields.
