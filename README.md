@@ -80,3 +80,14 @@ Removing file cacert.pem
 
 # :warning: MitM proxies/services
 Given the way MitM proxies and decryption services work, this tool is not intended to be used behind devices that perform SSL/TLS decryption as those devices strip the `Authority Information Access` (AIA), and alter the `Subject Key Identifier` (SKI) and `Authority Key Identifier` (AKI) fields.
+
+# Known issues 🌩️
+If a website's certificate chain has 4 or more tiers and one of the intermediate CA's do not have a AIA field - the script will only show the website certificate and the first issuing CA. 
+
+Something like this:
+* Root CA
+  * Issuing CA 1
+    * Issuing Sub CA 1
+      * Website certificate (example.com)
+
+Script will only output `Issuing Sub CA 1` and `website certificate`.
