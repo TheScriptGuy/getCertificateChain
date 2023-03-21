@@ -1,7 +1,7 @@
 # Description:     Get the certificate chain from a website.
 # Author:          TheScriptGuy
-# Last modified:   2023-03-11
-# Version:         0.01
+# Last modified:   2023-03-20
+# Version:         0.02
 
 import ssl
 from cryptography import x509
@@ -15,7 +15,7 @@ import os
 import glob
 import re
 
-scriptVersion = "0.01"
+scriptVersion = "0.02"
 maxDepth = 4
 certChain = []
 
@@ -135,8 +135,8 @@ def getCertificate(__hostname, __port):
         # Create the SSL connection
         sslConnection = ssl.create_connection((__hostname, __port))
 
-        # Create teh SSL context
-        sslContext = ssl.SSLContext()
+        # Create the SSL context
+        sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS)
 
         # Create the SSL socket within the sslConnection
         sslSocket = sslContext.wrap_socket(sslConnection, server_hostname=__hostname)
