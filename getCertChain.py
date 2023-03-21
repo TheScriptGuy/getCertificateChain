@@ -1,7 +1,7 @@
 # Description:     Get the certificate chain from a website.
 # Author:          TheScriptGuy
 # Last modified:   2023-03-20
-# Version:         0.03
+# Version:         0.04
 
 import ssl
 import socket
@@ -16,7 +16,7 @@ import os
 import glob
 import re
 
-scriptVersion = "0.03"
+scriptVersion = "0.04"
 maxDepth = 4
 certChain = []
 
@@ -194,9 +194,13 @@ def returnCertSKI(__sslCertificate):
 
 
 def returnCertAIA(__sslCertificate):
-    """Returns the AIA of the certificate. If not defined, then return none."""
-    certAIA = __sslCertificate.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
+    """Returns the AIA of the certificate. If not defined, then return None."""
+    try:
+        certAIA = __sslCertificate.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
 
+    except x509.extensions.ExtensionNotFound:
+        certAIA = None
+    
     return certAIA
 
 
@@ -288,6 +292,7 @@ def walkTheChain(__sslCertificate, __depth):
 
                 if rootCACN == None:
                     print("ERROR - Root CA NOT found.")
+                    sys.exit(1)
 
 
 def sendCertificateToFile(__filename, __sslCertificate):
@@ -365,22 +370,25 @@ def main():
 
     # Get the website certificate object from myHostname["hostname"]:myHostname["port"]
     __websiteCertificate = getCertificate(myHostname["hostname"], myHostname["port"])
+    
     if __websiteCertificate is not None:
         # Get the AIA from the __websiteCertificate object
         aia = returnCertAIA(__websiteCertificate)
+        if aia is not None:
+            # Extract the AIA URI list from the __websiteCertificate object.
+            aiaUriList = returnCertAIAList(__websiteCertificate)
 
-        # Extract the AIA URI list from the __websiteCertificate object.
-        aiaUriList = returnCertAIAList(__websiteCertificate)
+            # Append the __websiteCertificate object to the certChain list.
+            certChain.append(__websiteCertificate)
 
-        # Append the __websiteCertificate object to the certChain list.
-        certChain.append(__websiteCertificate)
+            # Now we walk the chain up until we get the Root CA.
+            walkTheChain(__websiteCertificate,1)
 
-        # Now we walk the chain up until we get the Root CA.
-        walkTheChain(__websiteCertificate,1)
-
-        # Write the certificate chain to individual files.
-        writeChainToFile(certChain)
-
+            # Write the certificate chain to individual files.
+            writeChainToFile(certChain)
+        else:
+            print("ERROR - I could not find AIA. Possible decryption taking place upstream?")
+            sys.exit(1)
 
 if __name__ == '__main__':
     try:
