@@ -4,6 +4,7 @@
 # Version:         0.02
 
 import ssl
+import socket
 from cryptography import x509
 from cryptography.x509.oid import ExtensionOID
 from cryptography.hazmat.primitives import hashes, serialization
@@ -132,17 +133,13 @@ def getCertificate(__hostname, __port):
     """Retrieves the certificate from the website."""
 
     try:
-        # Create the SSL connection
-        sslConnection = ssl.create_connection((__hostname, __port))
-
         # Create the SSL context
-        sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        sslContext = ssl.create_default_context()
 
-        # Create the SSL socket within the sslConnection
-        sslSocket = sslContext.wrap_socket(sslConnection, server_hostname=__hostname)
-
-        # Get the certificate from the connection, convert it to PEM format.
-        sslCertificate = ssl.DER_cert_to_PEM_cert(sslSocket.getpeercert(True))
+        with socket.create_connection((__hostname, __port)) as sock:
+            with sslContext.wrap_socket(sock, server_hostname=__hostname) as sslSocket:
+                # Get the certificate from the connection, convert it to PEM format.
+                sslCertificate = ssl.DER_cert_to_PEM_cert(sslSocket.getpeercert(True))
 
         # Load the PEM formatted file.
         sslCertificate = x509.load_pem_x509_certificate(sslCertificate.encode('ascii'))
