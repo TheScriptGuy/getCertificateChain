@@ -1,7 +1,7 @@
 # Description:     Get the certificate chain from a website.
 # Author:          TheScriptGuy
 # Last modified:   2023-03-20
-# Version:         0.02
+# Version:         0.03
 
 import ssl
 import socket
@@ -16,7 +16,7 @@ import os
 import glob
 import re
 
-scriptVersion = "0.02"
+scriptVersion = "0.03"
 maxDepth = 4
 certChain = []
 
@@ -267,6 +267,9 @@ def walkTheChain(__sslCertificate, __depth):
                 # Load the Root CA Cert Chain.
                 caRootStore = loadRootCACertChain("cacert.pem")
 
+                # Assume we cannot find a Root CA
+                rootCACN = None
+
                 # Iterate through the caRootStore object.
                 for rootCA in caRootStore:
                     try:
@@ -275,11 +278,16 @@ def walkTheChain(__sslCertificate, __depth):
                         rootCASKI = returnCertSKI(rootCACertificate)
                         rootCASKI_Value = rootCASKI._value.digest 
                         if rootCASKI_Value == certAKIValue:
+                            rootCACN = rootCA
+                            print(f"Root CA Found - {rootCACN}")
                             certChain.append(rootCACertificate)
                             break
                     except x509.extensions.ExtensionNotFound:
                         # Apparently some Root CA's don't have a SKI?
                         pass
+
+                if rootCACN == None:
+                    print("ERROR - Root CA NOT found.")
 
 
 def sendCertificateToFile(__filename, __sslCertificate):
