@@ -1,4 +1,7 @@
 # 2023-03-20
+## Version 0.04
+* Fixing bug [MitM proxy/ssl decrypt](https://github.com/TheScriptGuy/getCertificateChain/issues/5)
+
 ## Version 0.03
 * Enhancement request [adding Root Found output](https://github.com/TheScriptGuy/getCertificateChain/issues/2)
 
