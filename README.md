@@ -1,93 +1,116 @@
-# :closed_lock_with_key::closed_lock_with_key::closed_lock_with_key: Get the Certificate Chain :closed_lock_with_key::closed_lock_with_key::closed_lock_with_key:
+# Get Certificate Chain 🌐🔐
 
-Getting the certificate chain for a hostname should not be difficult!
+This Python script retrieves the certificate chain from a website, allowing you to analyze and verify the SSL/TLS certificates of the website. The original source can be found [here](https://github.com/TheScriptGuy/getCertificateChain), and the overwhelming majority of credit goes to [TheScriptGuy](https://github.com/TheScriptGuy).
 
-Sometimes websites do not present the full chain (against RFC recommendations) which means it's hard to find the certificate chain and troubleshoot.
+This repository is a fork of that project to act as a customized plugin for the [PAN Dashboard](https://github.com/cdot65/pan-dashboard/) project, allowing users to retrieve the certificate chain of a website from within the PAN Dashboard and have it uploaded to a PAN-OS or Panorama appliance.
 
-This script will attempt to use the breadcrumbs that are left by the certificate to build the chain and output it into files.
+## Table of Contents
 
-It's worked on publicly available websites (at least the ones I've tested). Happy to troubleshoot if an error pops up.
+- [Get Certificate Chain 🌐🔐](#get-certificate-chain-)
+  - [Table of Contents](#table-of-contents)
+  - [Requirements 📋](#requirements-)
+  - [Creating Virtual Environment with Poetry 🌱](#creating-virtual-environment-with-poetry-)
+  - [Creating Virtual Environment without Poetry 🌱](#creating-virtual-environment-without-poetry-)
+  - [Usage 🚀](#usage-)
+    - [Arguments](#arguments)
+  - [Examples](#examples)
+  - [License](#license)
 
+## Requirements 📋
 
-# Requirements
+- Python 3.10+
+- Poetry (optional) - [Python Poetry](https://python-poetry.org/docs/)
+
+## Creating Virtual Environment with Poetry 🌱
+
+To create a virtual environment with Poetry, follow these steps:
+
+1. Install Poetry if you haven't already:
+
+    ```bash
+    curl -sSL https://install.python-poetry.org | python3 -
+    ```
+
+2. Create a virtual environment:
+
+    ```bash
+    poetry install
+    ```
+
+3. Activate the virtual environment:
+
+    ```bash
+    poetry shell
+    ```
+
+## Creating Virtual Environment without Poetry 🌱
+
+To create a virtual environment without Poetry, follow these steps:
+
+1. Create a virtual environment:
+
+    ```bash
+    python3 -m venv venv
+    ```
+
+2. Activate the virtual environment:
+
+    ```bash
+    source venv/bin/activate
+    ```
+
+3. Install the required packages:
+
+    ```bash
+    pip install cryptography argparse requests
+    ```
+
+## Usage 🚀
+
+To use the script, run the following command:
+
 ```bash
-$ python3 -m pip install re cryptography argparse ssl
+python getCertChain.py --hostname www.google.com
 ```
 
-# :runner: How to run
-To get the arguments available `python3 getCertChain.py --help`. Should present information like this:
+### Arguments
+
+- `--hostname`: The hostname:port pair that the script should connect to. Defaults to www.google.com:443.
+- `--removeCertificateFiles`: Remove the certificate files in the current working directory (*.crt, *.pem).
+- `--getCAcertPEM`: Get cacert.pem from the curl.se website to help find Root CA.
+
+## Examples
+
+Get the certificate chain for www.example.com:
+
 ```bash
-$ python3 getCertChain.py --help
-usage: getCertChain.py [-h] [--hostname HOSTNAME] [--removeCertificateFiles] [--getCAcertPEM]
-
-Get Certificate Chain v0.04
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --hostname HOSTNAME   The hostname:port pair that the script should connect to. Defaults to www.google.com:443.
-  --removeCertificateFiles
-                        Remove the certificate files in current working directory (*.crt, *.pem).
-  --getCAcertPEM        Get cacert.pem from curl.se website to help find Root CA.
+python getCertChain.py --hostname www.example.com
 ```
 
-# :books: Examples
-To get the certificate chain for www.google.com
+Get the certificate chain for www.example.com:8443:
+
 ```bash
-$ python3 getCertChain --hostname www.google.com
-$
-```
-It by default will not display any output (unless it struggles to find the Root CA).
-
-To see the files it created (from where the script ran):
-```bash
-$ ls -l
-total 28
--rw-r--r-- 1 gituser gituser  1911 Mar 12 16:38 0-gts-root-r1.crt
--rw-r--r-- 1 gituser gituser  1996 Mar 12 16:38 1-gts-ca-1c3.crt
--rw-r--r-- 1 gituser gituser  1631 Mar 12 16:38 2-www.google.com.crt
--rw-r--r-- 1 gituser gituser 13385 Mar 12 16:36 getCertChain.py
-```
-If you notice the prefix of each new file that was created (i.e. 0-, 1-, 2-) this is the order of the chain with 
-* `0-` being the Root CA
-* `1-` being the intermediate CA
-* `2-` being the endpoint/website certificate
-
-The rest of the file name is deduced from the commonName in the certificate.
-
-On some occasions, the intermediate CA does not present an Authority Information Access field (AIA) with a URI on where to get the file from. 
-
-To help build the chain, we need some `external` help - leveraging the `cacert.pem` file from `curl.se` website.
-This is the url: :link: `https://curl.se/ca/cacert.pem`
-
-To get the `cacert.pem` file as part of the connection from `--hostname` argument:
-```bash
-$ python3 getCertChain.py --hostname www.google.com --getCAcertPEM
+python getCertChain.py --hostname www.example.com:8443
 ```
 
-You could also run it by itself:
+Get the certificate chain for www.example.com:8443 and remove the certificate files in the current working directory (*.crt, *.pem):
+
 ```bash
-$ python3 getCertChain.py --getCAcertPEM
+python getCertChain.py --hostname www.example.com:8443 --removeCertificateFiles
 ```
 
-# :dash::hole: Clean up all the files
+Get the certificate chain for www.example.com:8443 and get cacert.pem from the curl.se website to help find Root CA:
+
 ```bash
-$ python3 getCertChain.py --removeCertificateFiles
-Removing file 1-gts-ca-1c3.crt
-Removing file 2-www.google.com.crt
-Removing file 0-gts-root-r1.crt
-Removing file cacert.pem
+python getCertChain.py --hostname www.example.com:8443 --getCAcertPEM
 ```
 
-# :warning: MitM proxies/services
-Given the way MitM proxies and decryption services work, this tool is not intended to be used behind devices that perform SSL/TLS decryption as those devices strip the `Authority Information Access` (AIA), and alter the `Subject Key Identifier` (SKI) and `Authority Key Identifier` (AKI) fields.
+Get the certificate chain for www.example.com:8443, remove the certificate files in the current working directory (*.crt, *.pem), and get cacert.pem from the curl.se website to help find Root CA:
 
-# Known issues 🌩️
-If a website's certificate chain has 4 or more tiers and one of the intermediate CA's do not have a AIA field - the script will only show the website certificate and the first issuing CA. 
+```bash
+python getCertChain.py --hostname www.example.com:8443 --removeCertificateFiles --getCAcertPEM
+```
 
-Something like this:
-* Root CA
-  * Issuing CA 1
-    * Issuing Sub CA 1
-      * Website certificate (example.com)
+## License
 
-Script will only output `Issuing Sub CA 1` and `website certificate`.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
