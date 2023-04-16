@@ -24,21 +24,33 @@ certChain = []
 def parseArguments():
     """Create argument options and parse through them to determine what to do with script."""
     # Instantiate the parser
-    parser = argparse.ArgumentParser(description='Get Certificate Chain v' + scriptVersion)
+    parser = argparse.ArgumentParser(
+        description="Get Certificate Chain v" + scriptVersion
+    )
 
     # Optional arguments
-    parser.add_argument('--hostname', default='www.google.com:443',
-            help='The hostname:port pair that the script should connect to. Defaults to www.google.com:443.')
+    parser.add_argument(
+        "--hostname",
+        default="www.google.com:443",
+        help="The hostname:port pair that the script should connect to. Defaults to www.google.com:443.",
+    )
 
-    parser.add_argument('--removeCertificateFiles', action='store_true',
-            help='Remove the certificate files in current working directory (*.crt, *.pem).')
+    parser.add_argument(
+        "--removeCertificateFiles",
+        action="store_true",
+        help="Remove the certificate files in current working directory (*.crt, *.pem).",
+    )
 
-    parser.add_argument('--getCAcertPEM', action='store_true',
-            help='Get cacert.pem from curl.se website to help find Root CA.')
+    parser.add_argument(
+        "--getCAcertPEM",
+        action="store_true",
+        help="Get cacert.pem from curl.se website to help find Root CA.",
+    )
 
     global args
 
     args = parser.parse_args()
+
 
 def loadRootCACertChain(__filename):
     """
@@ -88,7 +100,9 @@ def loadRootCACertChain(__filename):
         return caRootStore
 
     except FileNotFoundError:
-        print("Could not find cacert.pem file. Please run script with --getCAcertPEM to get the file from curl.se website.")
+        print(
+            "Could not find cacert.pem file. Please run script with --getCAcertPEM to get the file from curl.se website."
+        )
         sys.exit(1)
 
 
@@ -106,24 +120,24 @@ def removeCertificateFiles():
 
 def normalizeSubject(__subject):
     """Normalize the subject name to use for file name purposes."""
-    normalizedName = __subject.split(',')
-    
+    normalizedName = __subject.split(",")
+
     # Iterate through all the elements of normalizedName, finding the CN= one.
     for item in normalizedName:
         isCommonName = item[:3]
         if isCommonName == "CN=":
-            itemIndex = item.find('=')
-            commonName = item[itemIndex+1:]
+            itemIndex = item.find("=")
+            commonName = item[itemIndex + 1 :]
             break
 
     # Replace spaces with hyphens
-    commonName = commonName.replace(' ','-')
+    commonName = commonName.replace(" ", "-")
 
     # Remove wildcards
-    commonName = commonName.replace('*.','')
+    commonName = commonName.replace("*.", "")
 
     # Make sure the filename string is lower case
-    newNormalizedName = ''.join(commonName).lower()
+    newNormalizedName = "".join(commonName).lower()
 
     # Return newNormalizedName
     return newNormalizedName
@@ -142,7 +156,7 @@ def getCertificate(__hostname, __port):
                 sslCertificate = ssl.DER_cert_to_PEM_cert(sslSocket.getpeercert(True))
 
         # Load the PEM formatted file.
-        sslCertificate = x509.load_pem_x509_certificate(sslCertificate.encode('ascii'))
+        sslCertificate = x509.load_pem_x509_certificate(sslCertificate.encode("ascii"))
 
     except ConnectionRefusedError:
         print(f"Connection refused to {__hostname}:{__port}")
@@ -154,14 +168,14 @@ def getCertificate(__hostname, __port):
 
 def getCertificateFromUri(__uri):
     """Gets the certificate from a URI.
-    By default, we're expecting to find nothing. Therefore certI = None. 
+    By default, we're expecting to find nothing. Therefore certI = None.
     If we find something, we'll update certI accordingly.
     """
     certI = None
 
     # Attempt to get the aia from __uri
     aiaRequest = requests.get(__uri)
-    
+
     # If response status code is 200
     if aiaRequest.status_code == 200:
         # Get the content and assign to aiaContent
@@ -171,7 +185,7 @@ def getCertificateFromUri(__uri):
         sslCertificate = ssl.DER_cert_to_PEM_cert(aiaContent)
 
         # Load the PEM formatted content using x509 module.
-        certI = x509.load_pem_x509_certificate(sslCertificate.encode('ascii'))
+        certI = x509.load_pem_x509_certificate(sslCertificate.encode("ascii"))
 
     # Return certI back to the script.
     return certI
@@ -180,7 +194,9 @@ def getCertificateFromUri(__uri):
 def returnCertAKI(__sslCertificate):
     """Returns the AKI of the certificate."""
     try:
-        certAKI = __sslCertificate.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_KEY_IDENTIFIER)
+        certAKI = __sslCertificate.extensions.get_extension_for_oid(
+            ExtensionOID.AUTHORITY_KEY_IDENTIFIER
+        )
     except x509.extensions.ExtensionNotFound:
         certAKI = None
     return certAKI
@@ -188,7 +204,9 @@ def returnCertAKI(__sslCertificate):
 
 def returnCertSKI(__sslCertificate):
     """Returns the SKI of the certificate."""
-    certSKI = __sslCertificate.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_KEY_IDENTIFIER)
+    certSKI = __sslCertificate.extensions.get_extension_for_oid(
+        ExtensionOID.SUBJECT_KEY_IDENTIFIER
+    )
 
     return certSKI
 
@@ -196,11 +214,13 @@ def returnCertSKI(__sslCertificate):
 def returnCertAIA(__sslCertificate):
     """Returns the AIA of the certificate. If not defined, then return None."""
     try:
-        certAIA = __sslCertificate.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
+        certAIA = __sslCertificate.extensions.get_extension_for_oid(
+            ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+        )
 
     except x509.extensions.ExtensionNotFound:
         certAIA = None
-    
+
     return certAIA
 
 
@@ -225,10 +245,10 @@ def returnCertAIAList(__sslCertificate):
 
 def walkTheChain(__sslCertificate, __depth):
     """
-    Walk the length of the chain, fetching information from AIA 
+    Walk the length of the chain, fetching information from AIA
     along the way until AKI == SKI (i.e. we've found the Root CA.
 
-    This is to prevent recursive loops. Usually there are only 4 certificates. 
+    This is to prevent recursive loops. Usually there are only 4 certificates.
     If the maxDepth is too small (why?) adjust it at the beginning of the script.
     """
 
@@ -246,7 +266,7 @@ def walkTheChain(__sslCertificate, __depth):
 
         # Get the value of the SKI from certSKI
         certSKIValue = certSKI._value.digest
-        
+
         # Sometimes the AKI can be none. Lets handle this accordingly.
         if certAKIValue is not None:
             aiaUriList = returnCertAIAList(__sslCertificate)
@@ -278,9 +298,11 @@ def walkTheChain(__sslCertificate, __depth):
                 for rootCA in caRootStore:
                     try:
                         rootCACertificatePEM = caRootStore[rootCA]
-                        rootCACertificate = x509.load_pem_x509_certificate(rootCACertificatePEM.encode('ascii'))
+                        rootCACertificate = x509.load_pem_x509_certificate(
+                            rootCACertificatePEM.encode("ascii")
+                        )
                         rootCASKI = returnCertSKI(rootCACertificate)
-                        rootCASKI_Value = rootCASKI._value.digest 
+                        rootCASKI_Value = rootCASKI._value.digest
                         if rootCASKI_Value == certAKIValue:
                             rootCACN = rootCA
                             print(f"Root CA Found - {rootCACN}")
@@ -316,19 +338,24 @@ def writeChainToFile(__certificateChain):
         normalizedSubject = normalizeSubject(certSubject)
 
         # Generate the certificate file name
-        sslCertificateFilename = str(len(__certificateChain) - 1 - counter) + '-' + normalizedSubject + '.crt'
+        sslCertificateFilename = (
+            str(len(__certificateChain) - 1 - counter)
+            + "-"
+            + normalizedSubject
+            + ".crt"
+        )
 
         # Send the certificate object to the sslCertificateFileName filename
         sendCertificateToFile(sslCertificateFilename, certificateItem)
 
 
 def checkHostname():
-    """Parse --hostname argument.""" 
+    """Parse --hostname argument."""
     tmpLine = ""
-    
+
     # If the ':' is in the hostname argument, then we'll assume it's meant to be a port following the ':'.
     if ":" in args.hostname:
-        tmpLine = args.hostname.split(':')
+        tmpLine = args.hostname.split(":")
         hostnameQuery = {"hostname": tmpLine[0], "port": int(tmpLine[1])}
 
     else:
@@ -349,7 +376,9 @@ def getCAcertPEM():
         with open("cacert.pem", "wb") as f_cacertpem:
             f_cacertpem.write(cacertpem.content)
     else:
-        print("Could not download cacert.pem. Please retrieve the file from the internet and manually upload to the current working directory.")
+        print(
+            "Could not download cacert.pem. Please retrieve the file from the internet and manually upload to the current working directory."
+        )
 
 
 def main():
@@ -370,7 +399,7 @@ def main():
 
     # Get the website certificate object from myHostname["hostname"]:myHostname["port"]
     __websiteCertificate = getCertificate(myHostname["hostname"], myHostname["port"])
-    
+
     if __websiteCertificate is not None:
         # Get the AIA from the __websiteCertificate object
         aia = returnCertAIA(__websiteCertificate)
@@ -382,19 +411,22 @@ def main():
             certChain.append(__websiteCertificate)
 
             # Now we walk the chain up until we get the Root CA.
-            walkTheChain(__websiteCertificate,1)
+            walkTheChain(__websiteCertificate, 1)
 
             # Write the certificate chain to individual files.
             writeChainToFile(certChain)
         else:
-            print("ERROR - I could not find AIA. Possible decryption taking place upstream?")
+            print(
+                "ERROR - I could not find AIA. Possible decryption taking place upstream?"
+            )
             sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print('Interrupted')
+        print("Interrupted")
         print()
         try:
             sys.exit(0)
