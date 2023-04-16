@@ -349,18 +349,18 @@ def writeChainToFile(__certificateChain):
         sendCertificateToFile(sslCertificateFilename, certificateItem)
 
 
-def checkHostname():
+def checkHostname(hostname):
     """Parse --hostname argument."""
     tmpLine = ""
 
     # If the ':' is in the hostname argument, then we'll assume it's meant to be a port following the ':'.
-    if ":" in args.hostname:
-        tmpLine = args.hostname.split(":")
+    if ":" in hostname:
+        tmpLine = hostname.split(":")
         hostnameQuery = {"hostname": tmpLine[0], "port": int(tmpLine[1])}
 
     else:
         # If no ':' is found, then set default port 443.
-        hostnameQuery = {"hostname": args.hostname, "port": 443}
+        hostnameQuery = {"hostname": hostname, "port": 443}
 
     return hostnameQuery
 
@@ -395,7 +395,7 @@ def main():
         getCAcertPEM()
 
     # Define the hostname to check.
-    myHostname = checkHostname()
+    myHostname = checkHostname(args.hostname)
 
     # Get the website certificate object from myHostname["hostname"]:myHostname["port"]
     __websiteCertificate = getCertificate(myHostname["hostname"], myHostname["port"])
@@ -405,7 +405,7 @@ def main():
         aia = returnCertAIA(__websiteCertificate)
         if aia is not None:
             # Extract the AIA URI list from the __websiteCertificate object.
-            aiaUriList = returnCertAIAList(__websiteCertificate)
+            # aiaUriList = returnCertAIAList(__websiteCertificate)
 
             # Append the __websiteCertificate object to the certChain list.
             certChain.append(__websiteCertificate)
