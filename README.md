@@ -2,7 +2,7 @@
 
 This Python script retrieves the certificate chain from a website, allowing you to analyze and verify the SSL/TLS certificates of the website. The original source can be found [here](https://github.com/TheScriptGuy/getCertificateChain), and the overwhelming majority of credit goes to [TheScriptGuy](https://github.com/TheScriptGuy).
 
-This repository is a fork of that project to act as a customized plugin for the [PAN Dashboard](https://github.com/cdot65/pan-dashboard/) project, allowing users to retrieve the certificate chain of a website from within the PAN Dashboard and have it uploaded to a PAN-OS or Panorama appliance.
+This repository will operate as a custom fork of that project to act as a customized plugin for the [PAN Dashboard](https://github.com/cdot65/pan-dashboard/) project, allowing users to retrieve the certificate chain of a website from within the PAN Dashboard and have it uploaded to a PAN-OS or Panorama appliance.
 
 ## Table of Contents
 
@@ -62,7 +62,7 @@ To create a virtual environment without Poetry, follow these steps:
 3. Install the required packages:
 
     ```bash
-    pip install cryptography argparse requests
+    pip install cryptography argparse
     ```
 
 ## Usage 🚀
@@ -70,45 +70,45 @@ To create a virtual environment without Poetry, follow these steps:
 To use the script, run the following command:
 
 ```bash
-python getCertChain.py --hostname www.google.com
+python get_certificate_chain.py --domain www.google.com
 ```
 
 ### Arguments
 
-- `--hostname`: The hostname:port pair that the script should connect to. Defaults to www.google.com:443.
-- `--removeCertificateFiles`: Remove the certificate files in the current working directory (*.crt, *.pem).
-- `--getCAcertPEM`: Get cacert.pem from the curl.se website to help find Root CA.
+- `--domain`: The domain:port pair that the script should connect to. Defaults to www.google.com:443.
+- `--rm-ca-files`: Remove the certificate files in the current working directory (*.crt, *.pem).
+- `--get-ca-cert-pem`: Get cacert.pem from the curl.se website to help find Root CA.
 
 ## Examples
 
 Get the certificate chain for www.example.com:
 
 ```bash
-python getCertChain.py --hostname www.example.com
+python get_certificate_chain.py --domain www.example.com
 ```
 
 Get the certificate chain for www.example.com:8443:
 
 ```bash
-python getCertChain.py --hostname www.example.com:8443
+python get_certificate_chain.py --domain www.example.com:8443
 ```
 
 Get the certificate chain for www.example.com:8443 and remove the certificate files in the current working directory (*.crt, *.pem):
 
 ```bash
-python getCertChain.py --hostname www.example.com:8443 --removeCertificateFiles
+python get_certificate_chain.py --domain www.example.com:8443 --rm-ca-files
 ```
 
 Get the certificate chain for www.example.com:8443 and get cacert.pem from the curl.se website to help find Root CA:
 
 ```bash
-python getCertChain.py --hostname www.example.com:8443 --getCAcertPEM
+python get_certificate_chain.py --domain www.example.com:8443 --get-ca-cert-pem
 ```
 
 Get the certificate chain for www.example.com:8443, remove the certificate files in the current working directory (*.crt, *.pem), and get cacert.pem from the curl.se website to help find Root CA:
 
 ```bash
-python getCertChain.py --hostname www.example.com:8443 --removeCertificateFiles --getCAcertPEM
+python get_certificate_chain.py --domain www.example.com:8443 --rm-ca-files --get-ca-cert-pem
 ```
 
 ## License

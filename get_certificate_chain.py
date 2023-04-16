@@ -9,7 +9,6 @@ and save them as PEM files as well.
 """
 # Standard library imports
 import glob
-import json
 import os
 import logging
 import re
@@ -17,60 +16,33 @@ import ssl
 import socket
 import sys
 from typing import Any, Dict, List
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 # Third-party library imports
 import argparse
-import requests
-import xmltodict
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.oid import ExtensionOID
-from dotenv import load_dotenv
-from xml.etree.ElementTree import tostring
-
-# Palo Alto Networks imports
-from panos import panorama
-
 
 VERSION = "0.1.0"
 CERT_CHAIN = []
 
-# ----------------------------------------------------------------------------
 # Configure logging
-# ----------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
 
-# ----------------------------------------------------------------------------
-# Load environment variables from .env file
-# ----------------------------------------------------------------------------
-load_dotenv(".env")
-PANURL = os.environ.get("PANURL", "panorama.lab.com")
-PANTOKEN = os.environ.get("PANTOKEN", "mysecretpassword")
-
-
-# ----------------------------------------------------------------------------
-# Function to parse command line arguments
-# ----------------------------------------------------------------------------
 def parse_arguments():
+    """
+    Parse command line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Export security rules and associated Security Profile Groups to a CSV file."
-    )
-    parser.add_argument(
-        "--pan-url",
-        dest="pan_url",
-        default=PANURL,
-        help="Panorama URL (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--pan-token",
-        dest="api_token",
-        default=PANTOKEN,
-        help="Panorama API Token (default: %(default)s)",
     )
     parser.add_argument(
         "--rm-ca-files",
@@ -93,19 +65,9 @@ def parse_arguments():
     return parser.parse_args()
 
 
-# ----------------------------------------------------------------------------
-# Function to create and return an instance of Panorama
-# ----------------------------------------------------------------------------
-def setup_panorama_client(pan_url: str, api_token: str) -> panorama.Panorama:
-    return panorama.Panorama(hostname=pan_url, api_key=api_token)
-
-
-# ----------------------------------------------------------------------------
-# Function to remove the certificate files in current working directory
-# ----------------------------------------------------------------------------
 def remove_cacert_pem():
     """
-    Remove the certificate files in current working directory (*.crt, *.pem).
+    Remove certificate files from the current directory.
     """
     for crt_file in glob.glob("*.crt"):
         os.remove(crt_file)
@@ -113,12 +75,9 @@ def remove_cacert_pem():
         os.remove(pem_file)
 
 
-# ----------------------------------------------------------------------------
-# Function to get cacert.pem from curl.se website to help find Root CA
-# ----------------------------------------------------------------------------
 def get_cacert_pem():
     """
-    Get cacert.pem from curl.se website to help find Root CA.
+    Download the cacert.pem file from the curl.se website.
     """
     cacert_pem_url = "https://curl.se/ca/cacert.pem"
     cacert_pem_file = "cacert.pem"
@@ -131,47 +90,35 @@ def get_cacert_pem():
                 response.getcode(),
             )
             sys.exit(1)
-        data = response.read()  # a `bytes` object
+        data = response.read()
         out_file.write(data)
     logging.info("Downloaded %s to %s", cacert_pem_url, cacert_pem_file)
 
 
-# ----------------------------------------------------------------------------
-# Function to parse --domain argument
-# ----------------------------------------------------------------------------
 def check_domain(domain: str) -> Dict[str, Any]:
-    """Parse --hostname argument."""
+    """
+    Check and parse the domain provided by the user.
+
+    Args:
+        domain (str): The domain provided by the user.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the hostname and port.
+    """
     hostname, _, port = domain.partition(":")
     return {"hostname": hostname, "port": int(port) if port else 443}
 
 
-# ----------------------------------------------------------------------------
-# Function to run our command
-# ----------------------------------------------------------------------------
-def fetch_system_information(pan: panorama.Panorama) -> Dict[str, Any]:
-    system_info = pan.op("show system info")
-    xml_string = tostring(system_info).decode(
-        "utf-8"
-    )  # Convert the Element object to a string
-    xml_dict = xmltodict.parse(
-        xml_string
-    )  # Parse the XML string to a Python dictionary
-    return json.loads(json.dumps(xml_dict))  # Convert the Python dictionary to JSON
-
-
-# ----------------------------------------------------------------------------
-# Function to get the SSL certificate from the website
-# ----------------------------------------------------------------------------
 def get_certificate(hostname: str, port: int) -> x509.Certificate:
     """
-    Get the SSL certificate from the website.
+    Connect to a server and retrieve the SSL certificate.
 
     Args:
-        hostname: The website hostname.
-        port: The website port.
+        hostname (str): The hostname to connect to.
+        port (int): The port to connect to.
 
     Returns:
-        The SSL certificate as an x509.Certificate object.
+        x509.Certificate: The SSL certificate of the server.
     """
     try:
         context = ssl.create_default_context()
@@ -196,18 +143,15 @@ def get_certificate(hostname: str, port: int) -> x509.Certificate:
         sys.exit(1)
 
 
-# ----------------------------------------------------------------------------
-# Function to normalize the subject name
-# ----------------------------------------------------------------------------
 def normalize_subject(subject: str) -> str:
     """
-    Normalize the subject name by removing spaces and special characters.
+    Normalize the subject of a certificate.
 
     Args:
-        subject: The subject name string.
+        subject (str): The subject of the certificate.
 
     Returns:
-        The normalized subject name string.
+        str: The normalized subject.
     """
     return "_".join(
         part.strip()
@@ -220,30 +164,24 @@ def normalize_subject(subject: str) -> str:
     )
 
 
-# ----------------------------------------------------------------------------
-# Function to save the SSL certificate as a PEM file
-# ----------------------------------------------------------------------------
 def save_ssl_certificate(ssl_certificate: x509.Certificate, file_name: str) -> None:
     """
-    Save the SSL certificate as a PEM file.
+    Save an SSL certificate to a file.
 
     Args:
-        ssl_certificate: The SSL certificate as an x509.Certificate object.
-        file_name: The name of the PEM file to save the certificate to.
+        ssl_certificate (x509.Certificate): The SSL certificate to save.
+        file_name (str): The file name to save the SSL certificate as.
     """
     with open(file_name, "wb") as f:
         f.write(ssl_certificate.public_bytes(encoding=serialization.Encoding.PEM))
 
 
-# ----------------------------------------------------------------------------
-# Function to write the chain to separate files
-# ----------------------------------------------------------------------------
 def write_chain_to_file(certificate_chain: List[x509.Certificate]) -> None:
     """
-    Write all the elements in the chain to separate files.
+    Write a certificate chain to files.
 
     Args:
-        certificate_chain: A list of SSL certificates as x509.Certificate objects.
+        certificate_chain (List[x509.Certificate]): The certificate chain to write to files.
     """
     for counter, certificate_item in enumerate(certificate_chain):
         cert_subject = certificate_item.subject.rfc4514_string()
@@ -254,18 +192,15 @@ def write_chain_to_file(certificate_chain: List[x509.Certificate]) -> None:
         save_ssl_certificate(certificate_item, ssl_certificate_filename)
 
 
-# ----------------------------------------------------------------------------
-# Function to return the AIA extension of the SSL certificate
-# ----------------------------------------------------------------------------
 def return_cert_aia(ssl_certificate: x509.Certificate) -> x509.Extensions:
     """
-    Returns the AIA extension of the SSL certificate, if available.
+    Get the Authority Information Access (AIA) extension from a certificate.
 
     Args:
-        ssl_certificate: The SSL certificate as an x509.Certificate object.
+        ssl_certificate (x509.Certificate): The SSL certificate.
 
     Returns:
-        The AIA extension as an x509.Extensions object, or None if not present.
+        x509.Extensions: The AIA extension or None if not found.
     """
     try:
         aia = ssl_certificate.extensions.get_extension_for_oid(
@@ -276,49 +211,39 @@ def return_cert_aia(ssl_certificate: x509.Certificate) -> x509.Extensions:
         return None
 
 
-# ----------------------------------------------------------------------------
-# Function to download the certificate from the given URI
-# ----------------------------------------------------------------------------
 def get_certificate_from_uri(uri: str) -> x509.Certificate:
     """
-    Download the certificate from the given URI and return it as an
-    x509.Certificate object.
+    Retrieve a certificate from the given URI.
 
     Args:
-        uri: The URI to download the certificate from.
+        uri (str): The URI to get the certificate from.
 
     Returns:
-        The downloaded certificate as an x509.Certificate object, or
-        None if there was an error.
+        x509.Certificate: The certificate from the URI or None if there was an error.
     """
     try:
-        response = requests.get(uri)
-
-        if response.status_code == 200:
-            aia_content = response.content
+        with urlopen(uri) as response:
+            if response.getcode() != 200:
+                return None
+            aia_content = response.read()
             ssl_certificate = ssl.DER_cert_to_PEM_cert(aia_content)
             cert = x509.load_pem_x509_certificate(
                 ssl_certificate.encode("ascii"), default_backend()
             )
             return cert
-        else:
-            return None
     except Exception:
         return None
 
 
-# ----------------------------------------------------------------------------
-# Function to return a list of AIA's defined in the SSL certificate
-# ----------------------------------------------------------------------------
 def return_cert_aia_list(ssl_certificate: x509.Certificate) -> list:
     """
-    Returns a list of AIA's defined in the SSL certificate.
+    Get the list of AIA URIs from a certificate.
 
     Args:
-        ssl_certificate: The SSL certificate as an x509.Certificate object.
+        ssl_certificate (x509.Certificate): The SSL certificate.
 
     Returns:
-        A list of AIA's, or an empty list if none are present.
+        list: A list of AIA URIs.
     """
     aia_uri_list = []
 
@@ -334,11 +259,16 @@ def return_cert_aia_list(ssl_certificate: x509.Certificate) -> list:
     return aia_uri_list
 
 
-# ----------------------------------------------------------------------------
-# Function to return the AKI extension of the SSL certificate
-# ----------------------------------------------------------------------------
 def return_cert_aki(ssl_certificate):
-    """Returns the AKI of the certificate."""
+    """
+    Get the Authority Key Identifier (AKI) from a certificate.
+
+    Args:
+        ssl_certificate (x509.Certificate): The SSL certificate.
+
+    Returns:
+        x509.AuthorityKeyIdentifier: The AKI extension or None if not found.
+    """
     try:
         cert_aki = ssl_certificate.extensions.get_extension_for_oid(
             ExtensionOID.AUTHORITY_KEY_IDENTIFIER
@@ -348,11 +278,16 @@ def return_cert_aki(ssl_certificate):
     return cert_aki
 
 
-# ----------------------------------------------------------------------------
-# Function to return the SKI extension of the SSL certificate
-# ----------------------------------------------------------------------------
 def return_cert_ski(ssl_certificate):
-    """Returns the SKI of the certificate."""
+    """
+    Get the Subject Key Identifier (SKI) from a certificate.
+
+    Args:
+        ssl_certificate (x509.Certificate): The SSL certificate.
+
+    Returns:
+        x509.SubjectKeyIdentifier: The SKI extension.
+    """
     cert_ski = ssl_certificate.extensions.get_extension_for_oid(
         ExtensionOID.SUBJECT_KEY_IDENTIFIER
     )
@@ -360,13 +295,20 @@ def return_cert_ski(ssl_certificate):
     return cert_ski
 
 
-# ----------------------------------------------------------------------------
-# Function to return the SAN extension of the SSL certificate
-# ----------------------------------------------------------------------------
 def load_root_ca_cert_chain(
     filename: str = None,
     ca_cert_text: str = None,
 ) -> Dict[str, str]:
+    """
+    Load the root CA certificate chain from a file or text.
+
+    Args:
+        filename (str, optional): The file name containing the root CA certificates.
+        ca_cert_text (str, optional): The text containing the root CA certificates.
+
+    Returns:
+        Dict[str, str]: A dictionary containing the root CA certificates.
+    """
     if filename is None and ca_cert_text is None:
         raise ValueError("Either filename or ca_cert_text must be provided")
 
@@ -408,23 +350,17 @@ def load_root_ca_cert_chain(
     return ca_root_store
 
 
-# ----------------------------------------------------------------------------
-# Function to return the AKI extension of the SSL certificate
-# ----------------------------------------------------------------------------
 def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int = 4):
     """
-    Walk through the certificate chain by fetching information from the
-    Authority Information Access (AIA) extension until the Authority
-    Key Identifier (AKI) equals the Subject Key Identifier (SKI), indicating
-    that the Root CA has been found.
+    Walk through the certificate chain and find the root CA.
 
-    If a certificate does not have the AIA extension, the functions try to
-    find the root certificate from a standard root store. The functionality
-    remains the same in both versions.
+    Args:
+        ssl_certificate (x509.Certificate): The SSL certificate.
+        depth (int): The current depth in the certificate chain.
+        max_depth (int, optional): The maximum depth to search in the certificate chain.
+
     """
-
     if depth <= max_depth:
-        # Retrieve the AKI and SKI from the certificate
         cert_aki = return_cert_aki(ssl_certificate)
         cert_ski = return_cert_ski(ssl_certificate)
 
@@ -447,7 +383,6 @@ def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int
                         logging.warning("Could not retrieve certificate.")
                         sys.exit(1)
             else:
-                # Certificate didn't have AIA, find the root from a standard root store
                 logging.warning("Certificate didn't have AIA.")
                 ca_root_store = load_root_ca_cert_chain("cacert.pem")
                 root_ca_cn = None
@@ -470,7 +405,6 @@ def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int
                             break
                     except x509.extensions.ExtensionNotFound:
                         logging.info("Root CA didn't have a SKI. Skipping...")
-                        # Apparently some Root CA's don't have a SKI?
                         pass
 
                 if root_ca_cn is None:
@@ -478,32 +412,18 @@ def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int
                     sys.exit(1)
 
 
-# ----------------------------------------------------------------------------
-# Main execution of the script
-# ----------------------------------------------------------------------------
 def main() -> None:
+    """
+    Main function to execute the script. Parses arguments, retrieves the SSL certificate, walks the chain,
+    and writes the certificate chain and PEM-encoded certificates.
+    """
     args = parse_arguments()
-
-    if args.remove_ca_files:
-        # Remove the .pem and .crt files from the current directory.
-        try:
-            remove_cacert_pem()
-        except FileNotFoundError:
-            pass
-
-    if args.get_ca_cert_pem:
-        # Download the cacert.pem file from the Internet.
-        get_cacert_pem()
 
     domain = check_domain(args.domain)
 
-    # Get the SSL certificate from the website.
     ssl_certificate = get_certificate(domain["hostname"], domain["port"])
 
-    # Get the AIA extension from the certificate
     aia = return_cert_aia(ssl_certificate)
-
-    # Check if the AIA extension is present
 
     if aia is not None and not return_cert_aia(ssl_certificate):
         print(
@@ -511,20 +431,14 @@ def main() -> None:
         )
         sys.exit(1)
 
-    # Append the ssl_certificate object to the CERT_CHAIN list.
     CERT_CHAIN.append(ssl_certificate)
 
-    # Walk the chain up until we get the Root CA.
     walk_the_chain(ssl_certificate, 1, max_depth=4)
 
-    # Write the certificate chain to individual files.
     write_chain_to_file(CERT_CHAIN)
 
     print("Certificate chain downloaded and saved.")
 
 
-# ----------------------------------------------------------------------------
-# Execute the main function
-# ----------------------------------------------------------------------------
 if __name__ == "__main__":
     main()
