@@ -40,9 +40,10 @@ jobs:
           $HOME/.local/bin/poetry install
 
       - name: Generate test certificate
+        working-directory: tests/test_data
         run: |
-          chmod +x tests/test_data/generate_cert.sh
-          ./tests/test_data/generate_cert.sh
+          chmod +x generate_cert.sh
+          ./generate_cert.sh
 
       - name: Run pytest
         run: |
