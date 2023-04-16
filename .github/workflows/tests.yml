@@ -1,0 +1,48 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Cache Poetry virtual environment
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: ${{ runner.os }}-poetry-
+
+      - name: Install dependencies
+        run: |
+          echo $PATH
+          echo $GITHUB_WORKSPACE
+          $GITHUB_WORKSPACE/.local/bin/poetry install
+
+      - name: Generate test certificate
+        run: |
+          chmod +x tests/test_data/generate_cert.sh
+          ./tests/test_data/generate_cert.sh
+
+      - name: Run pytest
+        run: |
+          $GITHUB_WORKSPACE/.local/bin/poetry run pytest

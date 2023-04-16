@@ -1,6 +1,6 @@
 [ req ]
 default_bits        = 2048
-default_keyfile     = example1_key.pem
+default_keyfile     = root_ca_key.pem
 distinguished_name  = req_distinguished_name
 req_extensions      = req_ext
 prompt              = no
@@ -11,14 +11,13 @@ ST = California
 L  = San Francisco
 O  = Example Company
 OU = IT
-CN = www.example1.com
-emailAddress = admin@example1.com
+CN = Root CA
+emailAddress = admin@example.com
 
 [ req_ext ]
 subjectKeyIdentifier = hash
-basicConstraints = CA:FALSE
-keyUsage = digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth
+basicConstraints = CA:TRUE
+keyUsage = keyCertSign, cRLSign
 
 [ v3_ca ]
 subjectKeyIdentifier = hash
