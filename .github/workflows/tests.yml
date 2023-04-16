@@ -37,7 +37,7 @@ jobs:
         run: |
           echo $PATH
           echo $GITHUB_WORKSPACE
-          $GITHUB_WORKSPACE/.local/bin/poetry install
+          $HOME/.local/bin/poetry install
 
       - name: Generate test certificate
         run: |
@@ -46,4 +46,6 @@ jobs:
 
       - name: Run pytest
         run: |
-          $GITHUB_WORKSPACE/.local/bin/poetry run pytest
+          echo $PATH
+          echo $GITHUB_WORKSPACE
+          $HOME/.local/bin/poetry run pytest
