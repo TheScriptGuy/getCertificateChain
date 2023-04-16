@@ -2,7 +2,7 @@
 name = "getcertificatechain"
 version = "0.1.0"
 description = "Project to help use the breadcrumbs that are left by the certificate to build the chain and output it into files."
-authors = ["Calvin Remsburg <cremsburg.dev@gmail.com>"]
+authors = ["Calvin Remsburg <cremsburg.dev@gmail.com>", " TheScriptGuy <@nolanrumble>"]
 license = "MIT"
 readme = "README.md"
 
@@ -10,12 +10,7 @@ readme = "README.md"
 python = "^3.11"
 cryptography = "^40.0.2"
 argparse = "^1.4.0"
-requests = "^2.28.2"
 pytest = "^7.3.1"
-pem = "^21.2.0"
-xmltodict = "^0.13.0"
-pan-os-python = "^1.8.1"
-python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
@@ -24,7 +19,7 @@ pytest-black = "^0.3.12"
 flake8 = "^6.0.0"
 ipython = "^8.12.0"
 ipdb = "^0.13.13"
-invoke = "^2.0.0"
+requests = "^2.28.2"
 
 [build-system]
 requires = ["poetry-core"]

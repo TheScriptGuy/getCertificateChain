@@ -106,7 +106,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 name = "certifi"
 version = "2022.12.7"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -195,7 +195,7 @@ pycparser = "*"
 name = "charset-normalizer"
 version = "3.1.0"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7.0"
 files = [
@@ -393,7 +393,7 @@ pyflakes = ">=3.0.0,<3.1.0"
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 files = [
@@ -411,18 +411,6 @@ python-versions = ">=3.7"
 files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
     {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
-]
-
-[[package]]
-name = "invoke"
-version = "2.0.0"
-description = "Pythonic task execution"
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "invoke-2.0.0-py3-none-any.whl", hash = "sha256:a860582bcf7a4b336fe18ef53937f0f28cec1c0053ffa767c2fcf7ba0b850f59"},
-    {file = "invoke-2.0.0.tar.gz", hash = "sha256:7ab5dd9cd76b787d560a78b1a9810d252367ab595985c50612702be21d671dd7"},
 ]
 
 [[package]]
@@ -552,33 +540,6 @@ files = [
 ]
 
 [[package]]
-name = "pan-os-python"
-version = "1.8.1"
-description = "Framework for interacting with Palo Alto Networks devices via API"
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-files = [
-    {file = "pan_os_python-1.8.1-py2.py3-none-any.whl", hash = "sha256:08d57f52d9b6b7f4637f8a0df918fa63e42d29a21baee6e9b1c0e4968a3698b2"},
-    {file = "pan_os_python-1.8.1.tar.gz", hash = "sha256:290be28ac5047a9d49c8654eff8972dbdabc0f5dc3e5aff0877dcdde84ae83f9"},
-]
-
-[package.dependencies]
-pan-python = ">=0.17.0,<0.18.0"
-
-[[package]]
-name = "pan-python"
-version = "0.17.0"
-description = "Multi-tool set for Palo Alto Networks PAN-OS, Panorama, WildFire and AutoFocus"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pan-python-0.17.0.tar.gz", hash = "sha256:9c074ea2f69a63996a6fefe8935d60dca61660e14715ac19d257ea9b1c41c6e2"},
-    {file = "pan_python-0.17.0-py2.py3-none-any.whl", hash = "sha256:f4674e40763c46d5933244b3059a57884e4e28205ef6d0f9ce2dc2013e3db010"},
-]
-
-[[package]]
 name = "parso"
 version = "0.8.3"
 description = "A Python Parser"
@@ -605,23 +566,6 @@ files = [
     {file = "pathspec-0.11.1-py3-none-any.whl", hash = "sha256:d8af70af76652554bd134c22b3e8a1cc46ed7d91edcdd721ef1a0c51a84a5293"},
     {file = "pathspec-0.11.1.tar.gz", hash = "sha256:2798de800fa92780e33acca925945e9a19a133b715067cf165b8866c15a31687"},
 ]
-
-[[package]]
-name = "pem"
-version = "21.2.0"
-description = "Easy PEM file parsing in Python."
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pem-21.2.0-py2.py3-none-any.whl", hash = "sha256:64afb669f05502c071d0706ee66e51471718ae248ba39624919da7b4ea73506e"},
-    {file = "pem-21.2.0.tar.gz", hash = "sha256:c491833b092662626fd58a87375d450637d4ee94996ad9bbbd42593428e93e5a"},
-]
-
-[package.extras]
-dev = ["certifi", "coverage[toml] (>=5.0.2)", "furo", "pre-commit", "pretend", "pyopenssl", "pytest", "sphinx", "twisted[tls]"]
-docs = ["furo", "sphinx"]
-tests = ["certifi", "coverage[toml] (>=5.0.2)", "pretend", "pyopenssl", "pytest"]
 
 [[package]]
 name = "pexpect"
@@ -813,25 +757,10 @@ pytest = ">=3.5.0"
 toml = "*"
 
 [[package]]
-name = "python-dotenv"
-version = "1.0.0"
-description = "Read key-value pairs from a .env file and set them as environment variables"
-category = "main"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "python-dotenv-1.0.0.tar.gz", hash = "sha256:a8df96034aae6d2d50a4ebe8216326c61c3eb64836776504fcca410e5937a3ba"},
-    {file = "python_dotenv-1.0.0-py3-none-any.whl", hash = "sha256:f5971a9226b701070a4bf2c38c89e5a3f0d64de8debda981d1db98583009122a"},
-]
-
-[package.extras]
-cli = ["click (>=5.0)"]
-
-[[package]]
 name = "requests"
 version = "2.28.2"
 description = "Python HTTP for Humans."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7, <4"
 files = [
@@ -913,7 +842,7 @@ test = ["argcomplete (>=2.0)", "pre-commit", "pytest", "pytest-mock"]
 name = "urllib3"
 version = "1.26.15"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 files = [
@@ -938,19 +867,7 @@ files = [
     {file = "wcwidth-0.2.6.tar.gz", hash = "sha256:a5220780a404dbe3353789870978e472cfe477761f06ee55077256e509b156d0"},
 ]
 
-[[package]]
-name = "xmltodict"
-version = "0.13.0"
-description = "Makes working with XML feel like you are working with JSON"
-category = "main"
-optional = false
-python-versions = ">=3.4"
-files = [
-    {file = "xmltodict-0.13.0-py2.py3-none-any.whl", hash = "sha256:aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852"},
-    {file = "xmltodict-0.13.0.tar.gz", hash = "sha256:341595a488e3e01a85a9d8911d8912fd922ede5fecc4dce437eb4b6c8d037e56"},
-]
-
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "68eff1b83d80abc504c9ab241a8e5ee6987d4ed69c8ddab5738bcdd22a2da193"
+content-hash = "9701d9d271777493f5d423394cc4bc30e7f5f1ead0a24dbecb0694d4b10a62f1"
