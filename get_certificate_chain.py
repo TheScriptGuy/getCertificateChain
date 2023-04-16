@@ -209,7 +209,15 @@ def normalize_subject(subject: str) -> str:
     Returns:
         The normalized subject name string.
     """
-    return re.sub(r"\W+", "_", subject)
+    return "_".join(
+        part.strip()
+        .replace("=", "_")
+        .replace(".", "_")
+        .replace(" ", "_")
+        .replace(",", "_")
+        for part in subject.split("/")
+        if part.strip()
+    )
 
 
 # ----------------------------------------------------------------------------
@@ -355,47 +363,49 @@ def return_cert_ski(ssl_certificate):
 # ----------------------------------------------------------------------------
 # Function to return the SAN extension of the SSL certificate
 # ----------------------------------------------------------------------------
-def load_root_ca_cert_chain(filename: str) -> Dict[str, str]:
-    """
-    Load the Root CA Chain in a structured format.
-    ca_root_store = {
-        "Root CA Name 1": "<PEM format1>",
-        "Root CA Name 2": "<PEM format2>",
-        ...
-    }
-    """
+def load_root_ca_cert_chain(
+    filename: str = None,
+    ca_cert_text: str = None,
+) -> Dict[str, str]:
+    if filename is None and ca_cert_text is None:
+        raise ValueError("Either filename or ca_cert_text must be provided")
+
     ca_root_store = {}
-    try:
+
+    if filename:
         with open(filename, "r") as f_ca_cert:
-            while True:
-                previous_line = f_ca_cert.readline()
-                current_line = f_ca_cert.readline()
+            ca_cert_text = f_ca_cert.read()
 
-                if not current_line:
-                    break
+    lines = ca_cert_text.splitlines()
+    line_count = len(lines)
+    index = 0
 
-                if re.search("^\={5,}", current_line):
-                    root_ca_cert = ""
-                    root_ca_name = previous_line.strip()
+    while index < line_count:
+        current_line = lines[index]
 
-                    while True:
-                        ca_cert_line = f_ca_cert.readline()
-                        if ca_cert_line.strip() != "-----END CERTIFICATE-----":
-                            root_ca_cert += ca_cert_line
-                        else:
-                            root_ca_cert += "-----END CERTIFICATE-----\n"
-                            break
+        if re.search(r"^-----BEGIN CERTIFICATE-----", current_line):
+            root_ca_cert = ""
+            index += 1
+            while index < line_count and not re.search(
+                r"^-----END CERTIFICATE-----", lines[index]
+            ):
+                root_ca_cert += lines[index] + "\n"
+                index += 1
 
-                    ca_root_store[root_ca_name] = root_ca_cert
+            root_ca_cert += lines[index] + "\n"
+            index += 1
 
-        print(f"Number of Root CA's loaded: {len(ca_root_store)}")
-        return ca_root_store
+            cert = x509.load_pem_x509_certificate(
+                root_ca_cert.encode(), default_backend()
+            )
+            root_ca_name = cert.subject.rfc4514_string()
 
-    except FileNotFoundError:
-        print(
-            "Could not find cacert.pem file. Please run script with --get-ca-cert-pem to get the file from curl.se website."
-        )
-        sys.exit(1)
+            ca_root_store[root_ca_name] = root_ca_cert
+        else:
+            index += 1
+
+    print(f"Number of Root CA's loaded: {len(ca_root_store)}")
+    return ca_root_store
 
 
 # ----------------------------------------------------------------------------
@@ -403,8 +413,8 @@ def load_root_ca_cert_chain(filename: str) -> Dict[str, str]:
 # ----------------------------------------------------------------------------
 def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int = 4):
     """
-    Both functions walk through the certificate chain by fetching information
-    from the Authority Information Access (AIA) extension until the Authority
+    Walk through the certificate chain by fetching information from the
+    Authority Information Access (AIA) extension until the Authority
     Key Identifier (AKI) equals the Subject Key Identifier (SKI), indicating
     that the Root CA has been found.
 
@@ -422,7 +432,7 @@ def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int
             cert_aki._value.key_identifier if cert_aki is not None else None
         )
         cert_ski_value = cert_ski._value.digest
-        print(f"cert_ski_value: {cert_ski_value}")
+        logging.info(f"Depth: {depth} - AKI: {cert_aki_value} - SKI: {cert_ski_value}")
 
         if cert_aki_value is not None:
             aia_uri_list = return_cert_aia_list(ssl_certificate)
@@ -434,11 +444,11 @@ def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int
                         CERT_CHAIN.append(next_cert)
                         walk_the_chain(next_cert, depth + 1, max_depth)
                     else:
-                        print("Could not retrieve certificate.")
+                        logging.warning("Could not retrieve certificate.")
                         sys.exit(1)
             else:
                 # Certificate didn't have AIA, find the root from a standard root store
-                print("Certificate didn't have AIA...ruh roh.")
+                logging.warning("Certificate didn't have AIA.")
                 ca_root_store = load_root_ca_cert_chain("cacert.pem")
                 root_ca_cn = None
 
@@ -453,15 +463,18 @@ def walk_the_chain(ssl_certificate: x509.Certificate, depth: int, max_depth: int
 
                         if root_ca_ski_value == cert_aki_value:
                             root_ca_cn = root_ca
-                            print(f"Root CA Found - {root_ca_cn}")
                             CERT_CHAIN.append(root_ca_certificate)
+                            logging.info(
+                                f"Root CA Found - {root_ca_cn}\nCERT_CHAIN - {CERT_CHAIN}"
+                            )
                             break
                     except x509.extensions.ExtensionNotFound:
+                        logging.info("Root CA didn't have a SKI. Skipping...")
                         # Apparently some Root CA's don't have a SKI?
                         pass
 
                 if root_ca_cn is None:
-                    print("ERROR - Root CA NOT found.")
+                    logging.error("Root CA NOT found.")
                     sys.exit(1)
 
 
