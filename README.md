@@ -62,7 +62,7 @@ To create a virtual environment without Poetry, follow these steps:
 3. Install the required packages:
 
     ```bash
-    pip install cryptography argparse
+    pip install cryptography argparse pytest
     ```
 
 ## Usage 🚀
