@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2023-04-17
+
+### Version 0.1.1
+
+* moved functionality into a class to allow for easier import into other scripts
+* support for passing a dictionary or argparse object into the class
+* updated tests to reflect changes
+* updated documentation to reflect changes
+* added screenshots to documentation
+
 ## 2023-04-16
 
 ### Version 0.1.0

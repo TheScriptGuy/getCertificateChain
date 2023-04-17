@@ -82,6 +82,15 @@ downloader = SSLCertificateChainDownloader()
 downloader.run(args)
 ```
 
+Or pass the arguments directly into the object:
+
+```python
+from get_certificate_chain import SSLCertificateChainDownloader
+args = {'domain': 'www.google.com'}
+downloader = SSLCertificateChainDownloader()
+downloader.run(args)
+```
+
 ![import](docs/images/import.png)
 
 ### Command Line CLI
