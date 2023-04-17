@@ -1,19 +1,20 @@
 # Get Certificate Chain 🌐🔐
 
-This Python script retrieves the certificate chain from a website, allowing you to analyze and verify the SSL/TLS certificates of the website. The original source can be found [here](https://github.com/TheScriptGuy/getCertificateChain), and the overwhelming majority of credit goes to [TheScriptGuy](https://github.com/TheScriptGuy).
-
-This repository will operate as a custom fork of that project to act as a customized plugin for the [PAN Dashboard](https://github.com/cdot65/pan-dashboard/) project, allowing users to retrieve the certificate chain of a website from within the PAN Dashboard and have it uploaded to a PAN-OS or Panorama appliance.
+This Python script retrieves the certificate chain from a website, allowing you to analyze and verify the SSL/TLS certificates of the website. This project is a custom fork of the [getCertificateChain project](https://github.com/TheScriptGuy/getCertificateChain), and the overwhelming majority of credit goes to [TheScriptGuy](https://github.com/TheScriptGuy).
 
 ## Table of Contents
 
 - [Get Certificate Chain 🌐🔐](#get-certificate-chain-)
   - [Table of Contents](#table-of-contents)
   - [Requirements 📋](#requirements-)
-  - [Creating Virtual Environment with Poetry 🌱](#creating-virtual-environment-with-poetry-)
-  - [Creating Virtual Environment without Poetry 🌱](#creating-virtual-environment-without-poetry-)
+  - [Installation](#installation)
+    - [PyPi](#pypi)
+    - [GitHub](#github)
   - [Usage 🚀](#usage-)
-    - [Arguments](#arguments)
-  - [Examples](#examples)
+    - [Import into script](#import-into-script)
+    - [Command Line CLI](#command-line-cli)
+      - [Arguments](#arguments)
+  - [Contributing](#contributing)
   - [License](#license)
 
 ## Requirements 📋
@@ -21,94 +22,107 @@ This repository will operate as a custom fork of that project to act as a custom
 - Python 3.10+
 - Poetry (optional) - [Python Poetry](https://python-poetry.org/docs/)
 
-## Creating Virtual Environment with Poetry 🌱
+## Installation
 
-To create a virtual environment with Poetry, follow these steps:
+### PyPi
 
-1. Install Poetry if you haven't already:
+To install the package from PyPi, simply run the appropriate command.
 
-    ```bash
-    curl -sSL https://install.python-poetry.org | python3 -
-    ```
+```bash
+pip install get-certificate-chain
+```
 
-2. Create a virtual environment:
+### GitHub
 
-    ```bash
-    poetry install
-    ```
+To install from the GitHub repository, follow these steps:
 
-3. Activate the virtual environment:
+1. Clone the repository.
+2. Change the directory to the cloned repository.
+3. Install the package using pip.
 
-    ```bash
-    poetry shell
-    ```
-
-## Creating Virtual Environment without Poetry 🌱
-
-To create a virtual environment without Poetry, follow these steps:
-
-1. Create a virtual environment:
-
-    ```bash
-    python3 -m venv venv
-    ```
-
-2. Activate the virtual environment:
-
-    ```bash
-    source venv/bin/activate
-    ```
-
-3. Install the required packages:
-
-    ```bash
-    pip install cryptography argparse pytest
-    ```
+```bash
+git clone https://github.com/cdot65/get_certificate_chain.git
+cd get_certificate_chain
+pip install .
+```
 
 ## Usage 🚀
 
-To use the script, run the following command:
+### Import into script
+
+To use the package in your script, simply import the package and create an instance of the `SSLCertificateChainDownloader` object.
+
+To pass arguments into the object, you can use the `argparse` library:
+
+1. Import the argparse library.
+2. Import the SSLCertificateChainDownloader object from the package.
+3. Create an argument parser with a description.
+4. Add your arguments.
+5. Parse the arguments.
+6. Create an instance of the SSLCertificateChainDownloader object.
+7. Run the downloader object with the parsed arguments.
+
+```python
+from get_certificate_chain import SSLCertificateChainDownloader
+
+downloader = SSLCertificateChainDownloader()
+# Use the downloader object for your needs
+```
+
+To pass arguments into the object, you can use the `argparse` library:
+
+```python
+import argparse
+from get_certificate_chain import SSLCertificateChainDownloader
+
+# Add your arguments
+args = parser.parse_args()
+
+downloader = SSLCertificateChainDownloader()
+downloader.run(args)
+```
+
+![import](docs/images/import.png)
+
+### Command Line CLI
+
+To use the script from the command line, run the following command:
 
 ```bash
 python get_certificate_chain.py --domain www.google.com
 ```
 
-### Arguments
+![CLI](docs/images/cli.png)
+
+#### Arguments
 
 - `--domain`: The domain:port pair that the script should connect to. Defaults to www.google.com:443.
 - `--rm-ca-files`: Remove the certificate files in the current working directory (*.crt, *.pem).
 - `--get-ca-cert-pem`: Get cacert.pem from the curl.se website to help find Root CA.
 
-## Examples
+## Contributing
 
-Get the certificate chain for www.example.com:
+Contributions are welcome! To contribute, please follow these guidelines:
+
+1. Write tests for your code using `pytest`. Make sure your tests follow the standards set by the existing tests.
+2. Set up a virtual environment using `Poetry`. You can install Poetry by following the instructions at https://python-poetry.org/docs/#installation.
+
+To set up a new virtual environment for the project, run the appropriate command.
 
 ```bash
-python get_certificate_chain.py --domain www.example.com
+poetry install
 ```
 
-Get the certificate chain for www.example.com:8443:
+To activate the virtual environment, run the appropriate command.
 
 ```bash
-python get_certificate_chain.py --domain www.example.com:8443
+poetry shell
 ```
 
-Get the certificate chain for www.example.com:8443 and remove the certificate files in the current working directory (*.crt, *.pem):
+After making your changes and adding tests, ensure that all tests pass by running the appropriate command.
 
 ```bash
-python get_certificate_chain.py --domain www.example.com:8443 --rm-ca-files
-```
-
-Get the certificate chain for www.example.com:8443 and get cacert.pem from the curl.se website to help find Root CA:
-
-```bash
-python get_certificate_chain.py --domain www.example.com:8443 --get-ca-cert-pem
-```
-
-Get the certificate chain for www.example.com:8443, remove the certificate files in the current working directory (*.crt, *.pem), and get cacert.pem from the curl.se website to help find Root CA:
-
-```bash
-python get_certificate_chain.py --domain www.example.com:8443 --rm-ca-files --get-ca-cert-pem
+pytest
 ```
 
 ## License
