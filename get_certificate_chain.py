@@ -15,8 +15,8 @@ import re
 import ssl
 import socket
 import sys
-from typing import Any, Dict, List
-from urllib.request import urlopen, Request
+from typing import Any, Dict, List, Union
+from urllib.request import urlopen
 
 # Third-party library imports
 import argparse
@@ -25,12 +25,12 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.oid import ExtensionOID
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 CERT_CHAIN = []
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+    level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
 
@@ -408,14 +408,29 @@ class SSLCertificateChainDownloader:
                         logging.error("Root CA NOT found.")
                         sys.exit(1)
 
-    def run(self, args: argparse.Namespace):
-        self.domain = args.domain
+    def run(self, args: Union[argparse.Namespace, dict]):
+        if isinstance(args, argparse.Namespace):
+            self.domain = args.domain
+        elif isinstance(args, dict):
+            self.domain = args.get("domain")
+        else:
+            raise ValueError(
+                "Invalid argument type. Expected argparse.Namespace or dict."
+            )
+
         self.parsed_domain = self.check_domain()
 
-        if args.remove_ca_files:
+        if isinstance(args, argparse.Namespace):
+            remove_ca_files = args.remove_ca_files
+            get_ca_cert_pem = args.get_ca_cert_pem
+        else:
+            remove_ca_files = args.get("remove_ca_files")
+            get_ca_cert_pem = args.get("get_ca_cert_pem")
+
+        if remove_ca_files:
             self.remove_ca_files()
 
-        if args.get_ca_cert_pem:
+        if get_ca_cert_pem:
             self.get_ca_cert_pem()
 
         ssl_certificate = self.get_certificate(
@@ -436,7 +451,7 @@ class SSLCertificateChainDownloader:
 
         self.write_chain_to_file(self.cert_chain)
 
-        print("Certificate chain downloaded and saved.")
+        logging.info("Certificate chain downloaded and saved.")
 
 
 def main() -> None:
