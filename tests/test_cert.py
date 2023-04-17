@@ -1,6 +1,6 @@
 import os
 import pytest
-from get_certificate_chain import (
+from main import (
     SSLCertificateChainDownloader,
 )
 

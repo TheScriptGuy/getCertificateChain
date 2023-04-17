@@ -25,7 +25,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.oid import ExtensionOID
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 CERT_CHAIN = []
 
 # Configure logging
