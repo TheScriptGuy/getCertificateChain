@@ -96,7 +96,7 @@ To use the script from the command line, run the following command:
 
 .. code-block:: bash
 
-   python get_certificate_chain.py --domain www.google.com
+   get-certificate-chain --domain www.google.com
 
 Arguments
 +++++++++
