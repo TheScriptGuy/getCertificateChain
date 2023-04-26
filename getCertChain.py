@@ -1,7 +1,7 @@
 # Description:     Get the certificate chain from a website.
 # Author:          TheScriptGuy
-# Last modified:   2023-03-20
-# Version:         0.04
+# Last modified:   2023-04-26
+# Version:         0.05
 
 import ssl
 import socket
@@ -16,8 +16,8 @@ import os
 import glob
 import re
 
-scriptVersion = "0.04"
-maxDepth = 4
+scriptVersion = "0.05"
+maxDepth = 6
 certChain = []
 
 
@@ -107,14 +107,25 @@ def removeCertificateFiles():
 def normalizeSubject(__subject):
     """Normalize the subject name to use for file name purposes."""
     normalizedName = __subject.split(',')
-    
     # Iterate through all the elements of normalizedName, finding the CN= one.
     for item in normalizedName:
         isCommonName = item[:3]
-        if isCommonName == "CN=":
-            itemIndex = item.find('=')
-            commonName = item[itemIndex+1:]
-            break
+        match isCommonName:
+            case "CN=":
+                itemIndex = item.find('=')
+                commonName = item[itemIndex+1:]
+                break
+            case "OU=":
+                # For the rare cases where there is no CN= in the Root CA field.
+                itemIndex = item.find('=')
+                commonName = item[itemIndex+1:]
+                break
+            case _:
+                # In the case where the there is neither a CN= or OU= field. We'll use whatever we first find
+                itemIndex = item.find('=')
+                commonName = item[itemIndex+1:]
+                break
+
 
     # Replace spaces with hyphens
     commonName = commonName.replace(' ','-')
@@ -231,7 +242,6 @@ def walkTheChain(__sslCertificate, __depth):
     This is to prevent recursive loops. Usually there are only 4 certificates. 
     If the maxDepth is too small (why?) adjust it at the beginning of the script.
     """
-
     if __depth <= maxDepth:
         # Retrive the AKI from the certificate.
         certAKI = returnCertAKI(__sslCertificate)
