@@ -1,6 +1,10 @@
 # Description:     Get the certificate chain from a website.
 # Author:          TheScriptGuy
+<<<<<<< HEAD
 # Last modified:   2023-07-09
+=======
+# Last modified:   2023-04-26
+>>>>>>> ef852ba4272c35aaea6fa46b7c5f9fb7f3ce32ca
 # Version:         0.05
 
 import ssl
@@ -17,7 +21,11 @@ import glob
 import re
 
 scriptVersion = "0.05"
+<<<<<<< HEAD
 maxDepth = 4
+=======
+maxDepth = 6
+>>>>>>> ef852ba4272c35aaea6fa46b7c5f9fb7f3ce32ca
 certChain = []
 
 
@@ -110,14 +118,25 @@ def removeCertificateFiles() -> None:
 def normalizeSubject(__subject: str) -> str:
     """Normalize the subject name to use for file name purposes."""
     normalizedName = __subject.split(',')
-    
     # Iterate through all the elements of normalizedName, finding the CN= one.
     for item in normalizedName:
         isCommonName = item[:3]
-        if isCommonName == "CN=":
-            itemIndex = item.find('=')
-            commonName = item[itemIndex+1:]
-            break
+        match isCommonName:
+            case "CN=":
+                itemIndex = item.find('=')
+                commonName = item[itemIndex+1:]
+                break
+            case "OU=":
+                # For the rare cases where there is no CN= in the Root CA field.
+                itemIndex = item.find('=')
+                commonName = item[itemIndex+1:]
+                break
+            case _:
+                # In the case where the there is neither a CN= or OU= field. We'll use whatever we first find
+                itemIndex = item.find('=')
+                commonName = item[itemIndex+1:]
+                break
+
 
     # Replace spaces with hyphens
     commonName = commonName.replace(' ','-')
@@ -240,7 +259,6 @@ def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
     This is to prevent recursive loops. Usually there are only 4 certificates. 
     If the maxDepth is too small (why?) adjust it at the beginning of the script.
     """
-
     if __depth <= maxDepth:
         # Retrive the AKI from the certificate.
         certAKI = returnCertAKI(__sslCertificate)

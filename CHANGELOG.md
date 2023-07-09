@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 # 2023-07-09
 ## Version 0.05
 * Adding ability to allow insecure connections (`--insecure`). Useful for when a website isn't properly configured.
+=======
+# 2023-04-26
+## Version 0.05
+* Fixing bug [no-commonname](https://github.com/TheScriptGuy/getCertificateChain/issues/9)
+>>>>>>> ef852ba4272c35aaea6fa46b7c5f9fb7f3ce32ca
 
 # 2023-03-20
 ## Version 0.04
