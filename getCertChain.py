@@ -1,10 +1,6 @@
 # Description:     Get the certificate chain from a website.
 # Author:          TheScriptGuy
-<<<<<<< HEAD
 # Last modified:   2023-07-09
-=======
-# Last modified:   2023-04-26
->>>>>>> ef852ba4272c35aaea6fa46b7c5f9fb7f3ce32ca
 # Version:         0.05
 
 import ssl
@@ -21,11 +17,7 @@ import glob
 import re
 
 scriptVersion = "0.05"
-<<<<<<< HEAD
 maxDepth = 4
-=======
-maxDepth = 6
->>>>>>> ef852ba4272c35aaea6fa46b7c5f9fb7f3ce32ca
 certChain = []
 
 
