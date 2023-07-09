@@ -28,20 +28,21 @@ def parseArguments():
 
     # Optional arguments
     parser.add_argument('--hostname', default='www.google.com:443',
-            help='The hostname:port pair that the script should connect to. Defaults to www.google.com:443.')
+                        help='The hostname:port pair that the script should connect to. Defaults to www.google.com:443.')
 
     parser.add_argument('--removeCertificateFiles', action='store_true',
-            help='Remove the certificate files in current working directory (*.crt, *.pem).')
+                        help='Remove the certificate files in current working directory (*.crt, *.pem).')
 
     parser.add_argument('--getCAcertPEM', action='store_true',
-            help='Get cacert.pem from curl.se website to help find Root CA.')
+                        help='Get cacert.pem from curl.se website to help find Root CA.')
 
     parser.add_argument('--insecure', action='store_true',
-            help='Allow insecure connections to establish.')
+                        help='Allow insecure connections to establish.')
 
     global args
 
     args = parser.parse_args()
+
 
 def loadRootCACertChain(__filename: str) -> dict:
     """
@@ -129,12 +130,11 @@ def normalizeSubject(__subject: str) -> str:
                 commonName = item[itemIndex+1:]
                 break
 
-
     # Replace spaces with hyphens
-    commonName = commonName.replace(' ','-')
+    commonName = commonName.replace(' ', '-')
 
     # Remove wildcards
-    commonName = commonName.replace('*.','')
+    commonName = commonName.replace('*.', '')
 
     # Make sure the filename string is lower case
     newNormalizedName = ''.join(commonName).lower()
@@ -145,7 +145,6 @@ def normalizeSubject(__subject: str) -> str:
 
 def getCertificate(__hostname: str, __port: int) -> x509.Certificate:
     """Retrieves the certificate from the website."""
-
     try:
         # Create the SSL context
         if not args.insecure:
@@ -167,21 +166,21 @@ def getCertificate(__hostname: str, __port: int) -> x509.Certificate:
     except ConnectionRefusedError:
         print(f"Connection refused to {__hostname}:{__port}")
         sys.exit(1)
-    
+
     # Return the sslCertificate object.
     return sslCertificate
 
 
 def getCertificateFromUri(__uri: str) -> x509.Certificate:
     """Gets the certificate from a URI.
-    By default, we're expecting to find nothing. Therefore certI = None. 
+    By default, we're expecting to find nothing. Therefore certI = None.
     If we find something, we'll update certI accordingly.
     """
     certI = None
 
     # Attempt to get the aia from __uri
     aiaRequest = requests.get(__uri)
-    
+
     # If response status code is 200
     if aiaRequest.status_code == 200:
         # Get the content and assign to aiaContent
@@ -220,7 +219,7 @@ def returnCertAIA(__sslCertificate: x509.Certificate) -> x509.extensions.Extensi
 
     except x509.extensions.ExtensionNotFound:
         certAIA = None
-    
+
     return certAIA
 
 
@@ -245,10 +244,10 @@ def returnCertAIAList(__sslCertificate: x509.Certificate) -> list:
 
 def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
     """
-    Walk the length of the chain, fetching information from AIA 
+    Walk the length of the chain, fetching information from AIA
     along the way until AKI == SKI (i.e. we've found the Root CA.
 
-    This is to prevent recursive loops. Usually there are only 4 certificates. 
+    This is to prevent recursive loops. Usually there are only 4 certificates.
     If the maxDepth is too small (why?) adjust it at the beginning of the script.
     """
     if __depth <= maxDepth:
@@ -265,7 +264,7 @@ def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
 
         # Get the value of the SKI from certSKI
         certSKIValue = certSKI._value.digest
-        
+
         # Sometimes the AKI can be none. Lets handle this accordingly.
         if certAKIValue is not None:
             aiaUriList = returnCertAIAList(__sslCertificate)
@@ -299,7 +298,7 @@ def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
                         rootCACertificatePEM = caRootStore[rootCA]
                         rootCACertificate = x509.load_pem_x509_certificate(rootCACertificatePEM.encode('ascii'))
                         rootCASKI = returnCertSKI(rootCACertificate)
-                        rootCASKI_Value = rootCASKI._value.digest 
+                        rootCASKI_Value = rootCASKI._value.digest
                         if rootCASKI_Value == certAKIValue:
                             rootCACN = rootCA
                             print(f"Root CA Found - {rootCACN}")
@@ -309,7 +308,7 @@ def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
                         # Apparently some Root CA's don't have a SKI?
                         pass
 
-                if rootCACN == None:
+                if rootCACN is None:
                     print("ERROR - Root CA NOT found.")
                     sys.exit(1)
 
@@ -342,9 +341,9 @@ def writeChainToFile(__certificateChain: list) -> None:
 
 
 def checkHostname() -> dict:
-    """Parse --hostname argument.""" 
+    """Parse --hostname argument."""
     tmpLine = ""
-    
+
     # If the ':' is in the hostname argument, then we'll assume it's meant to be a port following the ':'.
     if ":" in args.hostname:
         tmpLine = args.hostname.split(':')
@@ -389,7 +388,7 @@ def main():
 
     # Get the website certificate object from myHostname["hostname"]:myHostname["port"]
     __websiteCertificate = getCertificate(myHostname["hostname"], myHostname["port"])
-    
+   
     if __websiteCertificate is not None:
         # Get the AIA from the __websiteCertificate object
         aia = returnCertAIA(__websiteCertificate)
@@ -401,13 +400,14 @@ def main():
             certChain.append(__websiteCertificate)
 
             # Now we walk the chain up until we get the Root CA.
-            walkTheChain(__websiteCertificate,1)
+            walkTheChain(__websiteCertificate, 1)
 
             # Write the certificate chain to individual files.
             writeChainToFile(certChain)
         else:
             print("ERROR - I could not find AIA. Possible decryption taking place upstream?")
             sys.exit(1)
+
 
 if __name__ == '__main__':
     try:
