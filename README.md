@@ -17,10 +17,10 @@ $ python3 -m pip install re cryptography argparse ssl
 # :runner: How to run
 To get the arguments available `python3 getCertChain.py --help`. Should present information like this:
 ```bash
-$ python3 getCertChain.py --help
-usage: getCertChain.py [-h] [--hostname HOSTNAME] [--removeCertificateFiles] [--getCAcertPEM]
+$ python3 getCertChain.py -h
+usage: getCertChain.py [-h] [--hostname HOSTNAME] [--removeCertificateFiles] [--getCAcertPEM] [--insecure]
 
-Get Certificate Chain v0.04
+Get Certificate Chain v0.05
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -28,6 +28,7 @@ optional arguments:
   --removeCertificateFiles
                         Remove the certificate files in current working directory (*.crt, *.pem).
   --getCAcertPEM        Get cacert.pem from curl.se website to help find Root CA.
+  --insecure            Allow insecure connections to establish.
 ```
 
 # :books: Examples

@@ -1,3 +1,7 @@
+# 2023-07-09
+## Version 0.05
+* Adding ability to allow insecure connections (`--insecure`). Useful for when a website isn't properly configured.
+
 # 2023-03-20
 ## Version 0.04
 * Fixing bug [MitM proxy/ssl decrypt](https://github.com/TheScriptGuy/getCertificateChain/issues/5)
