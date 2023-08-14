@@ -1,3 +1,7 @@
+# 2023-08-13
+## Version 0.06
+* Fixing python syntax and code.
+
 # 2023-07-09
 ## Version 0.05
 * Adding ability to allow insecure connections (`--insecure`). Useful for when a website isn't properly configured.

@@ -1,14 +1,10 @@
 # Description:     Get the certificate chain from a website.
 # Author:          TheScriptGuy
-# Last modified:   2023-07-09
-# Version:         0.05
+# Last modified:   2023-08-13
+# Version:         0.06
 
 import ssl
 import socket
-from cryptography import x509
-from cryptography.x509.oid import ExtensionOID
-from cryptography.hazmat.primitives import hashes, serialization
-
 import requests
 import argparse
 import sys
@@ -16,7 +12,12 @@ import os
 import glob
 import re
 
-scriptVersion = "0.05"
+from cryptography import x509
+from cryptography.x509.oid import ExtensionOID
+from cryptography.hazmat.primitives import hashes, serialization
+from typing import Optional
+
+scriptVersion = "0.06"
 maxDepth = 4
 certChain = []
 
@@ -24,7 +25,7 @@ certChain = []
 def parseArguments():
     """Create argument options and parse through them to determine what to do with script."""
     # Instantiate the parser
-    parser = argparse.ArgumentParser(description='Get Certificate Chain v' + scriptVersion)
+    parser = argparse.ArgumentParser(description=f'Get Certificate Chain v{scriptVersion}')
 
     # Optional arguments
     parser.add_argument('--hostname', default='www.google.com:443',
@@ -67,13 +68,11 @@ def loadRootCACertChain(__filename: str) -> dict:
                     break
 
                 if re.search("^\={5,}", currentLine):
-                    """
-                    This is where the Root CA certificate file begins.
-                    Iterate through all the lines between
-                    -----BEGIN CERTIFICATE-----
-                    ...
-                    -----END CERTIFICATE-----
-                    """
+                    # This is where the Root CA certificate file begins.
+                    # Iterate through all the lines between
+                    # -----BEGIN CERTIFICATE-----
+                    # ...
+                    # -----END CERTIFICATE-----
                     rootCACert = ""
                     rootCAName = previousLine.strip()
 
@@ -152,10 +151,9 @@ def getCertificate(__hostname: str, __port: int) -> x509.Certificate:
         else:
             sslContext = ssl._create_unverified_context()
 
-        with socket.create_connection((__hostname, __port)) as sock:
-            with sslContext.wrap_socket(sock, server_hostname=__hostname) as sslSocket:
-                # Get the certificate from the connection, convert it to PEM format.
-                sslCertificate = ssl.DER_cert_to_PEM_cert(sslSocket.getpeercert(True))
+        with socket.create_connection((__hostname, __port)) as sock, with sslContext.wrap_socket(sock, server_hostname=__hostname) as sslSocket:
+            # Get the certificate from the connection, convert it to PEM format.
+            sslCertificate = ssl.DER_cert_to_PEM_cert(sslSocket.getpeercert(True))
 
         # Load the PEM formatted file.
         sslCertificate = x509.load_pem_x509_certificate(sslCertificate.encode('ascii'))
@@ -196,7 +194,7 @@ def getCertificateFromUri(__uri: str) -> x509.Certificate:
     return certI
 
 
-def returnCertAKI(__sslCertificate: x509.Certificate) -> x509.extensions.Extension:
+def returnCertAKI(__sslCertificate: x509.Certificate) -> Optional[x509.extensions.Extension]:
     """Returns the AKI of the certificate."""
     try:
         certAKI = __sslCertificate.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_KEY_IDENTIFIER)
@@ -212,7 +210,7 @@ def returnCertSKI(__sslCertificate: x509.Certificate) -> x509.extensions.Extensi
     return certSKI
 
 
-def returnCertAIA(__sslCertificate: x509.Certificate) -> x509.extensions.Extension:
+def returnCertAIA(__sslCertificate: x509.Certificate) -> Optional[x509.extensions.Extension]:
     """Returns the AIA of the certificate. If not defined, then return None."""
     try:
         certAIA = __sslCertificate.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
@@ -233,7 +231,7 @@ def returnCertAIAList(__sslCertificate: x509.Certificate) -> list:
 
         # If the extension is x509.AuthorityInformationAccess) then lets get the caIssuers from the field.
         if isinstance(certValue, x509.AuthorityInformationAccess):
-            dataAIA = [x for x in certValue or []]
+            dataAIA = list(certValue)
             for item in dataAIA:
                 if item.access_method._name == "caIssuers":
                     aiaUriList.append(item.access_location._value)
@@ -262,13 +260,10 @@ def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
         else:
             certAKIValue = None
 
-        # Get the value of the SKI from certSKI
-        certSKIValue = certSKI._value.digest
-
         # Sometimes the AKI can be none. Lets handle this accordingly.
         if certAKIValue is not None:
             aiaUriList = returnCertAIAList(__sslCertificate)
-            if aiaUriList != []:
+            if aiaUriList:
                 # Iterate through the aiaUriList list.
                 for item in aiaUriList:
                     # get the certificate for the item element.
@@ -388,14 +383,11 @@ def main():
 
     # Get the website certificate object from myHostname["hostname"]:myHostname["port"]
     __websiteCertificate = getCertificate(myHostname["hostname"], myHostname["port"])
-   
+
     if __websiteCertificate is not None:
         # Get the AIA from the __websiteCertificate object
         aia = returnCertAIA(__websiteCertificate)
         if aia is not None:
-            # Extract the AIA URI list from the __websiteCertificate object.
-            aiaUriList = returnCertAIAList(__websiteCertificate)
-
             # Append the __websiteCertificate object to the certChain list.
             certChain.append(__websiteCertificate)
 
