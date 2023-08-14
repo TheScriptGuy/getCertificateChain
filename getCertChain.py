@@ -151,7 +151,7 @@ def getCertificate(__hostname: str, __port: int) -> x509.Certificate:
         else:
             sslContext = ssl._create_unverified_context()
 
-        with socket.create_connection((__hostname, __port)) as sock, with sslContext.wrap_socket(sock, server_hostname=__hostname) as sslSocket:
+        with socket.create_connection((__hostname, __port)) as sock, sslContext.wrap_socket(sock, server_hostname=__hostname) as sslSocket:
             # Get the certificate from the connection, convert it to PEM format.
             sslCertificate = ssl.DER_cert_to_PEM_cert(sslSocket.getpeercert(True))
 
