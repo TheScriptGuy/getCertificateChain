@@ -67,7 +67,7 @@ def loadRootCACertChain(__filename: str) -> dict:
                 if not currentLine:
                     break
 
-                if re.search("^\={5,}", currentLine):
+                if re.search("^={5,}", currentLine):
                     # This is where the Root CA certificate file begins.
                     # Iterate through all the lines between
                     # -----BEGIN CERTIFICATE-----
@@ -251,8 +251,6 @@ def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
     if __depth <= maxDepth:
         # Retrive the AKI from the certificate.
         certAKI = returnCertAKI(__sslCertificate)
-        # Retrieve the SKI from the certificate.
-        certSKI = returnCertSKI(__sslCertificate)
 
         # Sometimes the AKI can be none. Lets handle this accordingly.
         if certAKI is not None:
@@ -278,7 +276,7 @@ def walkTheChain(__sslCertificate: x509.Certificate, __depth: int) -> None:
                         print("Could not retrieve certificate.")
                         sys.exit(1)
             else:
-                """Now we have to go on a hunt to find the root from a standard root store."""
+                # Now we have to go on a hunt to find the root from a standard root store.
                 print("Certificate didn't have AIA...ruh roh.")
 
                 # Load the Root CA Cert Chain.
