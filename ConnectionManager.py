@@ -34,7 +34,7 @@ class ConnectionManager:
             hostnameQuery = {"hostname": tmpLine[0], "port": int(tmpLine[1])}
         else:
             # If no ':' is found, then set default port 443.
-            hostnameQuery = {"hostname": __hostname, "port": 443}        
+            hostnameQuery = {"hostname": __hostname, "port": 443}       
 
         return hostnameQuery
 
@@ -48,7 +48,7 @@ class ConnectionManager:
             else:
                 sslContext = ssl._create_unverified_context()
 
-            with socket.create_connection((self.starting_hostname['hostname'], self.starting_hostname['port'])) as sock: 
+            with socket.create_connection((self.starting_hostname['hostname'], self.starting_hostname['port'])) as sock:
                 with sslContext.wrap_socket(sock, server_hostname=self.starting_hostname['hostname']) as sslSocket:
                     # Get the certificate from the connection, convert it to PEM format.
                     sslCertificate = ssl.DER_cert_to_PEM_cert(sslSocket.getpeercert(True))

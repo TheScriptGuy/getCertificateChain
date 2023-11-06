@@ -48,7 +48,7 @@ class CertificateManager:
             },
             "Root CA Name 2": {
               "pem": "<PEM format1>",
-              "SKI": "Subject Key Identifier"    
+              "SKI": "Subject Key Identifier"   
             }",
             ...
         }
@@ -135,7 +135,7 @@ class CertificateManager:
 
         return certSKI
 
-    @staticmethod    
+    @staticmethod   
     def returnCertAIA(__sslCertificate: x509.Certificate) -> Optional[x509.extensions.Extension]:
         """Returns the AIA of the certificate. If not defined, then return None."""
         try:
@@ -298,6 +298,6 @@ class CertificateManager:
             file_manager.write_to_file(
                 certificateItem.public_bytes(
                     encoding=serialization.Encoding.PEM
-                    ), 
+                    ),
                 sslCertificateFilename
-                )  
+                ) 
