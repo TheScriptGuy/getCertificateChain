@@ -18,7 +18,8 @@ class ConnectionManager:
     	"""Configure the hostname."""
     	self.starting_hostname = self.reformat_hostname(__hostname)
 
-    def reformat_hostname(self, __hostname) -> dict:
+    @staticmethod
+    def reformat_hostname(__hostname) -> dict:
         """
         Parse __hostname argument.
         Make sure that if a port isn't supplied, then assume default port of 443.
@@ -65,7 +66,8 @@ class ConnectionManager:
         # Return the sslCertificate object.
         return sslCertificate
 
-    def get_file_contents(self, uri: str) -> Optional[bytes]:
+    @staticmethod
+    def get_file_contents(uri: str) -> Optional[bytes]:
         """
         Retrieve the file contents from a specified URI if the HTTP response code is 200.
 

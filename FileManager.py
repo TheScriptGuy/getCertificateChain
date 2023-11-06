@@ -8,7 +8,8 @@ class FileManager:
     """
     version = '1.0'
 
-    def delete_files(self, files_or_wildcards: List[str]) -> None:
+    @staticmethod
+    def delete_files(files_or_wildcards: List[str]) -> None:
         """
         Deletes files based on a list of filenames or wildcards. If a file does not exist,
         or the wildcard does not yield any results, it prints a message with the filename or wildcard.
@@ -35,7 +36,8 @@ class FileManager:
                 except OSError as e:
                     print(f"Error deleting file {file}: {e}")
 
-    def write_to_file(self, obj: Any, filename: str) -> None:
+    @staticmethod
+    def write_to_file(obj: Any, filename: str) -> None:
         """
         Writes an object to a file with the specified filename. If the object is a string or bytes,
         it writes directly to the file. If it's another type that can be converted to a string (e.g., dict, list),
