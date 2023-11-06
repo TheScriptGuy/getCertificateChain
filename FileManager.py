@@ -5,17 +5,17 @@ from typing import List, Any
 class FileManager:
     """
     FileManager class that provides methods for deleting files and writing objects to files.
-	"""
+    """
     version = '1.0'
-    
+
     def delete_files(self, files_or_wildcards: List[str]) -> None:
         """
         Deletes files based on a list of filenames or wildcards. If a file does not exist,
         or the wildcard does not yield any results, it prints a message with the filename or wildcard.
-        
+
         Parameters:
             files_or_wildcards (List[str]): A list of filenames or wildcard strings to match files for deletion.
-            
+
         Returns:
             None
         """
@@ -25,7 +25,7 @@ class FileManager:
             if not files:
                 print(f"No files found for wildcard/pattern: '{pattern}'")
                 continue
-            
+
             for file in files:
                 try:
                     os.remove(file)
@@ -34,18 +34,18 @@ class FileManager:
                     print(f"File does not exist and cannot be deleted: {file}")
                 except OSError as e:
                     print(f"Error deleting file {file}: {e}")
-    
+
     def write_to_file(self, obj: Any, filename: str) -> None:
         """
         Writes an object to a file with the specified filename. If the object is a string or bytes,
         it writes directly to the file. If it's another type that can be converted to a string (e.g., dict, list),
         it converts to a string using str() before writing.
-        
+
         Parameters:
-            obj (Any): The object to be written to the file. Can be a string, bytes, or any object 
+            obj (Any): The object to be written to the file. Can be a string, bytes, or any object
                        that has a string representation.
             filename (str): The name of the file to which the object will be written.
-            
+
         Returns:
             None
         """

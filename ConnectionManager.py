@@ -34,7 +34,7 @@ class ConnectionManager:
         else:
             # If no ':' is found, then set default port 443.
             hostnameQuery = {"hostname": __hostname, "port": 443}        
-        
+
         return hostnameQuery
 
     def get_certificate(self, secure: bool = True) -> x509.Certificate:
@@ -46,7 +46,7 @@ class ConnectionManager:
                 sslContext = ssl.create_default_context()
             else:
                 sslContext = ssl._create_unverified_context()
-        
+
             with socket.create_connection((self.starting_hostname['hostname'], self.starting_hostname['port'])) as sock: 
                 with sslContext.wrap_socket(sock, server_hostname=self.starting_hostname['hostname']) as sslSocket:
                     # Get the certificate from the connection, convert it to PEM format.
@@ -54,14 +54,14 @@ class ConnectionManager:
 
             # Load the PEM formatted file.
             sslCertificate = x509.load_pem_x509_certificate(sslCertificate.encode('ascii'))
-        
+
         except ssl.SSLCertVerificationError as e:
             print(f"SSL Verification error. {e.verify_message}\nTry with the --insecure option.")
             sys.exit(1)
         except ConnectionRefusedError:
             print(f"Connection refused to {self.starting_hostname['hostname']}:{__port}")
             sys.exit(1)
-        
+
         # Return the sslCertificate object.
         return sslCertificate
 
@@ -100,27 +100,27 @@ class ConnectionManager:
 
         return response.content
 
-    
+
     def get_certificate_from_uri(self, __uri: str) -> x509.Certificate:
         """Gets the certificate from a URI.
         By default, we're expecting to find nothing. Therefore certI = None.
         If we find something, we'll update certI accordingly.
         """
         certI = None
-    
+
         # Attempt to get the aia from __uri
         aiaRequest = requests.get(__uri)
-    
+
         # If response status code is 200
         if aiaRequest.status_code == 200:
             # Get the content and assign to aiaContent
             aiaContent = aiaRequest.content
-    
+
             # Convert the certificate into PEM format.
             sslCertificate = ssl.DER_cert_to_PEM_cert(aiaContent)
-    
+
             # Load the PEM formatted content using x509 module.
             certI = x509.load_pem_x509_certificate(sslCertificate.encode('ascii'))
-    
+
         # Return certI back to the script.
         return certI
