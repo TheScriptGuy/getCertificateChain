@@ -35,7 +35,7 @@ class ConnectionManager:
             hostnameQuery = {"hostname": tmpLine[0], "port": int(tmpLine[1])}
         else:
             # If no ':' is found, then set default port 443.
-            hostnameQuery = {"hostname": __hostname, "port": 443}       
+            hostnameQuery = {"hostname": __hostname, "port": 443}      
 
         return hostnameQuery
 

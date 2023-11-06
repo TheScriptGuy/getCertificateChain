@@ -49,7 +49,7 @@ class CertificateManager:
             },
             "Root CA Name 2": {
               "pem": "<PEM format1>",
-              "SKI": "Subject Key Identifier"   
+              "SKI": "Subject Key Identifier"  
             }",
             ...
         }
@@ -136,7 +136,7 @@ class CertificateManager:
 
         return certSKI
 
-    @staticmethod   
+    @staticmethod  
     def returnCertAIA(__sslCertificate: x509.Certificate) -> Optional[x509.extensions.Extension]:
         """Returns the AIA of the certificate. If not defined, then return None."""
         try:
@@ -196,8 +196,6 @@ class CertificateManager:
         if __depth <= self.max_chain_depth:
             # Retrive the AKI from the certificate.
             certAKI = self.returnCertAKI(__sslCertificate)
-            # Retrieve the SKI from the certificate.
-            certSKI = self.returnCertSKI(__sslCertificate)
 
             # Sometimes the AKI can be none. Lets handle this accordingly.
             if certAKI is not None:
@@ -301,4 +299,4 @@ class CertificateManager:
                     encoding=serialization.Encoding.PEM
                     ),
                 sslCertificateFilename
-                ) 
+                )

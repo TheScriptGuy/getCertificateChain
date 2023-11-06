@@ -64,7 +64,6 @@ def main():
     if args.getCAcertPEM:
         getCAcertPEM()
 
-
     # Check to see if hostname argument is passed. If not, exit.
     if args.hostname:
         # Define a connection_manager object as ConnectionManager class
@@ -74,7 +73,6 @@ def main():
         # No hostname argument was supplied. Exit.
         print("Please supply a --hostname argument.")
         sys.exit(1)
-
 
     # Define a certificate_manager object from CertificateManager class
     certificate_manager = CertificateManager("cacert.pem", maxDepth)
