@@ -10,6 +10,7 @@ from ConnectionManager import ConnectionManager
 
 class CertificateManager:
     """CertificateManager Class"""
+
     version = '1.0'
 
     def __init__(self, file_path: str, max_chain_depth: int):

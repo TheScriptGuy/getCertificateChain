@@ -9,6 +9,7 @@ from typing import Optional
 
 class ConnectionManager:
     """ConnectionManager Class"""
+
     version = "0.1"
 
     def __init__(self) -> None:

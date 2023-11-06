@@ -7,6 +7,7 @@ class FileManager:
     """
     FileManager class that provides methods for deleting files and writing objects to files.
     """
+
     version = '1.0'
 
     @staticmethod
