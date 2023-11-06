@@ -20,7 +20,7 @@ To get the arguments available `python3 getCertChain.py --help`. Should present 
 $ python3 getCertChain.py -h
 usage: getCertChain.py [-h] [--hostname HOSTNAME] [--removeCertificateFiles] [--getCAcertPEM] [--insecure]
 
-Get Certificate Chain v0.06
+Get Certificate Chain v0.07
 
 optional arguments:
   -h, --help            show this help message and exit
