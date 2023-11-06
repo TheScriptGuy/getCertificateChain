@@ -17,8 +17,8 @@ class ConnectionManager:
         self.starting_hostname = ""
 
     def configure_hostname(self, __hostname) -> None:
-    	"""Configure the hostname."""
-    	self.starting_hostname = self.reformat_hostname(__hostname)
+        """Configure the hostname."""
+        self.starting_hostname = self.reformat_hostname(__hostname)
 
     @staticmethod
     def reformat_hostname(__hostname) -> dict:
