@@ -75,7 +75,7 @@ def main():
         print("Please supply a --hostname argument.")
         sys.exit(1)
 
-    
+
     # Define a certificate_manager object from CertificateManager class
     certificate_manager = CertificateManager("cacert.pem", maxDepth)
 
@@ -86,7 +86,7 @@ def main():
         certificate = connection_manager.get_certificate()
 
     certificate_manager.set_certificate(certificate)
-    
+
     # Prepare to walk the chain
     certificate_manager.start_walk_of_chain()
 
