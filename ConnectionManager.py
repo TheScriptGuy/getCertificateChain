@@ -6,6 +6,7 @@ import sys
 from cryptography import x509
 from typing import Optional
 
+
 class ConnectionManager:
     """ConnectionManager Class"""
     version = "0.1"

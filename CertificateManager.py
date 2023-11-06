@@ -7,6 +7,7 @@ from typing import Dict, Optional
 from FileManager import FileManager
 from ConnectionManager import ConnectionManager
 
+
 class CertificateManager:
     """CertificateManager Class"""
     version = '1.0'

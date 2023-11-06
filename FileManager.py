@@ -2,6 +2,7 @@ import os
 import glob
 from typing import List, Any
 
+
 class FileManager:
     """
     FileManager class that provides methods for deleting files and writing objects to files.
