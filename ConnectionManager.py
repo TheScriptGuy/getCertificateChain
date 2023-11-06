@@ -7,6 +7,7 @@ from cryptography import x509
 from typing import Optional
 
 class ConnectionManager:
+    """ConnectionManager Class"""
     version = "0.1"
 
     def __init__(self) -> None:
@@ -85,18 +86,19 @@ class ConnectionManager:
 
         try:
             response = requests.get(uri)
-            if response.status_code == 200:
-                return response.content
-            else:
+            if response.status_code != 200:
                 # If the status is not 200, you can raise an HTTPError
                 response.raise_for_status()
         except HTTPError as e:
             # Handle specific HTTP errors if needed
             print(f"Received non-200 HTTP status code: {e}")
+            sys.exit(1)
         except RequestException as e:
             # Handle any other requests-related exceptions
             print(f"An error occurred while trying to retrieve the file: {e}")
-        return None
+            sys.exit(1)
+
+        return response.content
 
     
     def get_certificate_from_uri(self, __uri: str) -> x509.Certificate:

@@ -1,9 +1,6 @@
-import ssl
 import re
 import sys
 from cryptography import x509
-#from cryptography.x509.oid import ExtensionOID
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes, serialization
 from typing import Dict, Optional
 
@@ -11,11 +8,13 @@ from FileManager import FileManager
 from ConnectionManager import ConnectionManager
 
 class CertificateManager:
+    """CertificateManager Class"""
     version = '1.0'
 
     def __init__(self, file_path: str, max_chain_depth: int):
         self.cacerts = self.load_cacerts(file_path)
         self.max_chain_depth = max_chain_depth
+        self.certificate = None
         self.cert_chain = []
 
 
@@ -235,7 +234,7 @@ class CertificateManager:
                             print("Could not retrieve certificate.")
                             sys.exit(1)
                 else:
-                    """Now we have to go on a hunt to find the root from a standard root store."""
+                    # Now we have to go on a hunt to find the root from a standard root store.
                     print("Certificate didn't have AIA...ruh roh.")
     
                     # Assume we cannot find a Root CA

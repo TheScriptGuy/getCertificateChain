@@ -5,10 +5,7 @@ from typing import List, Any
 class FileManager:
     """
     FileManager class that provides methods for deleting files and writing objects to files.
-    
-    Attributes:
-        version (str): The version of the FileManager class.
-    """
+	"""
     version = '1.0'
     
     def delete_files(self, files_or_wildcards: List[str]) -> None:
