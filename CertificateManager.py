@@ -17,7 +17,6 @@ class CertificateManager:
         self.certificate = None
         self.cert_chain = []
 
-
     @staticmethod
     def _extract_common_name(cert_obj: x509.Certificate) -> str:
         """Extracts the common name from the certificate object."""
@@ -98,13 +97,11 @@ class CertificateManager:
             print("Could not find cacert.pem file. Please run script with --getCAcertPEM to get the file from curl.se website.")
             sys.exit(1)
 
-
     def print_cacerts(self) -> None:
         """Print the loaded CA certificates with truncated PEM content."""
         for subject, cert_info in self.cacerts_dict.items():
             pem_content = cert_info['pem_certificate'].split("-----BEGIN CERTIFICATE-----")[1].strip()
             print(f"Subject: {subject: <60}SKI: {cert_info['SKI']} PEM_Cert: {pem_content[:15]}...")
-
 
     def query_cacerts(self, ski: str) -> Optional[Dict[str, str]]:
         """
@@ -118,11 +115,9 @@ class CertificateManager:
         """
         return next((cert_info for cert_info in self.cacerts_dict.values() if cert_info['SKI'] == ski), None)
 
-
     def set_certificate(self, __certificate: x509.Certificate) -> None:
         """Puts the certificate object into this class for processing."""
         self.certificate = __certificate
-
 
     @staticmethod
     def returnCertAKI(__sslCertificate: x509.Certificate) -> Optional[x509.extensions.Extension]:
@@ -133,14 +128,12 @@ class CertificateManager:
             certAKI = None
         return certAKI
 
-
     @staticmethod
     def returnCertSKI(__sslCertificate: x509.Certificate) -> x509.extensions.Extension:
         """Returns the SKI of the certificate."""
         certSKI = __sslCertificate.extensions.get_extension_for_oid(x509.oid.ExtensionOID.SUBJECT_KEY_IDENTIFIER)
 
         return certSKI
-
 
     @staticmethod    
     def returnCertAIA(__sslCertificate: x509.Certificate) -> Optional[x509.extensions.Extension]:
@@ -152,7 +145,6 @@ class CertificateManager:
             certAIA = None
 
         return certAIA
-
 
     @staticmethod
     def returnCertAIAList(__sslCertificate: x509.Certificate) -> list:
@@ -173,7 +165,6 @@ class CertificateManager:
         # Return the aiaUriList back to the script.
         return aiaUriList
 
-
     def start_walk_of_chain(self):
         if self.certificate is not None:
             # Get the AIA from the __websiteCertificate object
@@ -192,7 +183,6 @@ class CertificateManager:
         else:
             # self.certificate has not been defined yet.
             sys.exit(1)
-
 
     def walk_the_chain(self, __sslCertificate: x509.Certificate, __depth: int) -> None:
         """
@@ -257,7 +247,6 @@ class CertificateManager:
                         print("ERROR - Root CA NOT found.")
                         sys.exit(1)
 
-
     @staticmethod
     def _normalize_subject(subject: str) -> str:
         """Normalize the subject name to use for file name purposes."""
@@ -286,7 +275,6 @@ class CertificateManager:
 
         # Ensure we return a string even if commonName remains None
         return new_normalized_name if new_normalized_name is not None else ""
-
 
     def write_chain_to_file(self) -> None:
         """Write all the elements in the chain to file."""

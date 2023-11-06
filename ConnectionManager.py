@@ -65,7 +65,6 @@ class ConnectionManager:
         # Return the sslCertificate object.
         return sslCertificate
 
-
     def get_file_contents(self, uri: str) -> Optional[bytes]:
         """
         Retrieve the file contents from a specified URI if the HTTP response code is 200.
@@ -99,7 +98,6 @@ class ConnectionManager:
             sys.exit(1)
 
         return response.content
-
 
     def get_certificate_from_uri(self, __uri: str) -> x509.Certificate:
         """Gets the certificate from a URI.
