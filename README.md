@@ -79,6 +79,18 @@ Removing file 0-gts-root-r1.crt
 Removing file cacert.pem
 ```
 
+# :lock: :bulb: Windows Powershell :bulb: :lock:
+Using AI, I wrote a powershell script that can help accomplish the same thing within windows. This only downloads the certificates. It does not have the capability to remove them.
+To download the chain that the hostname presents:
+Usage:
+```powershell
+.\getCertificateChain.ps1 -hostname www.example.com
+```
+To download the chain that the hostname presents and use the Authority Information Access (AIA) Fields use the `-useAIA` argument to assist:
+```powershell
+.\getCertificateChain.ps1 -hostname www.example.com -useAIA
+```
+
 # :warning: MitM proxies/services
 Given the way MitM proxies and decryption services work, this tool is not intended to be used behind devices that perform SSL/TLS decryption as those devices strip the `Authority Information Access` (AIA), and alter the `Subject Key Identifier` (SKI) and `Authority Key Identifier` (AKI) fields.
 
